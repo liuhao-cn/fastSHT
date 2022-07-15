@@ -1,24 +1,39 @@
-# Folders:
-IDL:                  the IDL wrappers
-
-SHT_ring_skip_table:  the tables for ring optimization
-
-plm_table:            the tables and initial plms at the safe positions, currently, this is used only for nside>512
-
-x64:                  the VS project outputs, including the final dll (SHT.dll) and lib (SHT.lib)
-
-src:                  F90 source code
-
-ipynb:                Working python notebook
+fastSHT is a very fast toolkit for doing spherical harmonic transforms on a large number of spherical maps. It converts massive SHT operations to a BLAS level 3 problem and uses the highly optimized matrix multiplication toolkit to accelerate the computation. GPU acceleration is supported and can be very effective. Core code is written in fortran but a Python wrapper is provided and recommended.
 
 
-All f90 source codes are parts of the VS Intel fortran project (SHT.vfproj)
+# Dependencies
 
-# Files:
+Fortran compiler: `ifort` is recommanded for the CPU version; `nvfortran` is required for the GPU version
 
-CMakeLists:           CMake file for linking with python wrapper
+Intel MKL library
 
-compile.sh            Script that compiles the python wrapper
+[`f90wrap`](https://github.com/jameskermode/f90wrap)
+
+`Python3`, `numpy`, `CMake`
 
 
+# (Recommended) Download and compile with the docker image that is compatable with both CPU and GPU version
 
+```
+docker pull rectaflex/intel_nvidia_sdk
+```
+
+# Compilation
+
+```
+./compile.sh # for the CPU version
+```
+
+```
+./compile.sh -DGPU=on # for the GPU version
+```
+
+# Examples and Testing
+General tests and comparisons with Healpy is in `scripts/test_all.py`.
+
+Notebook that demonstrates the basic interfaces is in  `scripts/demo.ipynb`.
+
+
+# Citing fastSHT
+
+...
