@@ -49,12 +49,11 @@ test_cl = np.array([1 for l in range(1,lmax+1)] )
 
 def test_t2alm(nside, lmax, nsim, test_cl, niter = 0, seed=23333, compare=True):
     print('Testing t2alm...')
-    #np.random.seed(seed)
-    #maps = np.asfortranarray(np.transpose([hp.sphtfunc.synfast(test_cl, nside, lmax)
-    #             for i in range(nsim)]) )
+    np.random.seed(seed)
+    maps = np.asfortranarray(np.transpose([hp.sphtfunc.synfast(test_cl, nside, lmax)
+                 for i in range(nsim)]) )
     #maps = np.save('maps_' + str(nsim) + '.npy', maps)
-    #return
-    maps = np.load('maps_' + str(nsim) + '.npy')
+    #maps = np.load('maps_' + str(nsim) + '.npy')
     sht = SHT.SHT(nside, lmax, nsim, niter)
     
     start = time.time()
