@@ -3,12 +3,6 @@
 
 # In[1]:
 import sys as sys
-
-sys.path.append('..')
-import SHT
-import fastSHT
-
-
 import os
 n_proc = 8
 os.environ["OMP_NUM_THREADS"] = str(n_proc) # export OMP_NUM_THREADS=4
@@ -16,6 +10,12 @@ os.environ["OPENBLAS_NUM_THREADS"] = str(n_proc) # export OPENBLAS_NUM_THREADS=4
 os.environ["MKL_NUM_THREADS"] = str(n_proc) # export MKL_NUM_THREADS=6
 os.environ["VECLIB_MAXIMUM_THREADS"] = str(n_proc) # export VECLIB_MAXIMUM_THREADS=4
 os.environ["NUMEXPR_NUM_THREADS"] = str(n_proc) # export NUMEXPR_NUM_THREADS=6
+
+sys.path.append('..')
+import SHT
+import fastSHT
+
+
 import numpy as np
 
 import healpy as hp
