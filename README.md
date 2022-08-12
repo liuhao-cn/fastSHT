@@ -33,6 +33,13 @@ General tests and comparisons with Healpy is in `scripts/test_all.py`.
 
 Notebook that demonstrates the basic interfaces is in  `scripts/demo.ipynb`.
 
+# FAQs
+
+## Linking errors associated with Intel MKL
+
+Try pre-load some MKL libraries by
+
+`export LD_PRELOAD=:/opt/intel/oneapi/mkl/2022.0.2/lib/intel64/libmkl_core.so:/opt/intel/oneapi/mkl/2022.0.2/lib/intel64/libmkl_intel_lp64.so:/opt/intel/oneapi/mkl/2022.0.2/lib/intel64/libmkl_intel_thread.so:/opt/intel/oneapi/compiler/2022.0.2/linux/compiler/lib/intel64_lin/libiomp5.so`
 
 # Citing fastSHT
 
