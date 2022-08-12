@@ -31,7 +31,7 @@ if [[ ${1} == *"GPU"* ]]; then
 
 f90wrap -m fastSHT -k src/kind_map  src/sht_main.f90 src/convert_alm.f90 src/sht_data_init.f90
 
-LDFLAGS="-cpp -Mcuda -acc -Mcudalib=cublas -fPIC -lcufft -pgf90libs -mp -lpthread -lm -ldl -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread" f2py-f90wrap --fcompiler=nv -c -m _fastSHT f90wrap_*.f90 --f90flags="-cpp -acc -Mcuda -Mcudalib=cublas -pgf90libs -mp -lpthread -lm -ldl" *.a
+LDFLAGS="-cpp -qopenmp -Mcuda -acc -Mcudalib=cublas -fPIC -lcufft -pgf90libs -mp -lpthread -lm -ldl -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread" f2py-f90wrap --fcompiler=nv -c -m _fastSHT f90wrap_*.f90 --f90flags="-cpp -acc -Mcuda -Mcudalib=cublas -pgf90libs -mp -lpthread -lm -ldl" *.a
 
 else
 
@@ -40,7 +40,7 @@ gfortran -E -cpp  ../src/sht_main.f90 > src/sht_main.f90
 
 f90wrap -m fastSHT -k src/kind_map  src/sht_main.f90 src/sht_data_init.f90 src/convert_alm.f90
 
-LDFLAGS="-cpp --fcompiler=intelem  -qopenmp -fpp -auto -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread" f2py-f90wrap --fcompiler=intelem -c -m _fastSHT f90wrap_*.f90 --f90flags="-cpp   -lpthread -ldl" *.a    
+LDFLAGS="-cpp -fpp -auto -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread" f2py-f90wrap --fcompiler=intelem -c -m _fastSHT f90wrap_*.f90 --f90flags="-cpp   -lpthread -ldl" *.a    
 fi
 
 
