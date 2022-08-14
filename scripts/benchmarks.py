@@ -4,7 +4,30 @@
 # In[1]:
 import sys as sys
 import os
+
+nside = 64
+nsim = 2000
 n_proc = 8
+niter = 3
+compare = False
+
+if len(sys.argv)>1:
+    nside = int(sys.argv[1])
+if len(sys.argv)>2:
+    nsim = int(sys.argv[2])
+if len(sys.argv)>3:
+    n_proc = int(sys.argv[3])
+if len(sys.argv)>4:
+    niter = int(sys.argv[4])
+if len(sys.argv)>5:
+    compare = sys.argv[5].lower() == "true"
+
+print(" ")
+print("Working with the following parameters:")
+print("nside = %i, nsim = %i, n_proc = %i, niter = %i, comparison = %s" 
+    %(nside, nsim, n_proc, niter, compare))
+print(" ")
+
 os.environ["OMP_NUM_THREADS"] = str(n_proc) # export OMP_NUM_THREADS=4
 os.environ["OPENBLAS_NUM_THREADS"] = str(n_proc) # export OPENBLAS_NUM_THREADS=4 
 os.environ["MKL_NUM_THREADS"] = str(n_proc) # export MKL_NUM_THREADS=6
@@ -35,9 +58,7 @@ importlib.reload(SHT)
 # In[3]:
 
 
-nside = 64
 lmax = 3*nside - 1
-nsim = 2000
 npix = 12 * nside ** 2
 test_cl = np.array([1 for l in range(1,lmax+1)] )
 
@@ -225,7 +246,7 @@ def test_qu2eb(nside, lmax, nsim, test_cl, niter = 0, seed=23333, compare=True):
 # In[6]:
 
     
-#test_t2alm(nside, lmax, nsim, np.array([1 for l in range(1,lmax+1)] ), niter=3, compare=False)
+#test_t2alm(nside, lmax, nsim, np.array([1 for l in range(1,lmax+1)] ), niter=niter, compare=compare)
 
-#test_qu2eb(nside, lmax, nsim, np.array([1 for l in range(1,lmax+1)] ), niter=0, compare=False)
-test_fix_EB(nside, lmax, 3, compare=False)
+#test_qu2eb(nside, lmax, nsim, np.array([1 for l in range(1,lmax+1)] ), niter=niter, compare=compare)
+test_fix_EB(nside, lmax, niter, compare=compare)
