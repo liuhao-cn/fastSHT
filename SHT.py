@@ -36,9 +36,9 @@ class SHT:
         plm_val1 = np.fromfile(plm_dir + 'plm_val1_' + str(nside).rjust(4,'0') + '.bin', dtype=np.double)
         plm_val2 = np.fromfile(plm_dir + 'plm_val2_' + str(nside).rjust(4,'0') + '.bin', dtype=np.double)
 
-        plm_pos = np.asfortranarray(plm_pos.reshape(2*nside, int(len(plm_pos) / (2*nside)))[:,:lmax+1], dtype=np.int32)
-        plm_val1 = np.asfortranarray(plm_val1.reshape(2*nside, int(len(plm_val1) / (2*nside)))[:,:lmax+1], dtype=np.double)
-        plm_val2 = np.asfortranarray(plm_val2.reshape(2*nside, int(len(plm_val2) / (2*nside)))[:,:lmax+1], dtype=np.double)
+        plm_pos = np.asfortranarray(plm_pos.reshape(2*nside, int(len(plm_pos) / (2*nside)), order='F')[:,:lmax+1], dtype=np.int32)
+        plm_val1 = np.asfortranarray(plm_val1.reshape(2*nside, int(len(plm_val1) / (2*nside)), order='F')[:,:lmax+1], dtype=np.double)
+        plm_val2 = np.asfortranarray(plm_val2.reshape(2*nside, int(len(plm_val2) / (2*nside)), order='F')[:,:lmax+1], dtype=np.double)
 
         plm_val1[plm_pos >= lmax] = 0
         plm_val2[plm_pos >= lmax] = 0
