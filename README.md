@@ -28,9 +28,8 @@ docker pull rectaflex/intel_nvidia_sdk
 ./compile.sh -DGPU=on # for the GPU version
 ```
 
-```
 A known Issue:
-```
+
 If intel oneapi is installed with a user account, then one may need to run the following command before compiling:
 ```
 export MKL_DIR=~/lib/cmake/mkl-xxxx.x.x/
