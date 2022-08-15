@@ -18,16 +18,6 @@ Intel MKL library
 docker pull rectaflex/intel_nvidia_sdk
 ```
 
-# Large file support
-Some data file needs to be downloaded using git-lfs. Please refer to the git-lfs manual for more details. 
-
-For example: in Ubuntu this can be done by
-```
-sudo apt install git-lfs
-git pull
-git-lfs pull
-```
-
 # Compilation
 
 ```
