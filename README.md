@@ -47,9 +47,9 @@ Notebook that demonstrates the basic interfaces is in  `scripts/demo.ipynb`.
 
 Try pre-load some MKL libraries by
 
-`export LD_PRELOAD=:/opt/intel/oneapi/mkl/2022.0.2/lib/intel64/libmkl_core.so:/opt/intel/oneapi/mkl/2022.0.2/lib/intel64/libmkl_intel_lp64.so:/opt/intel/oneapi/mkl/2022.0.2/lib/intel64/libmkl_intel_thread.so:/opt/intel/oneapi/compiler/2022.0.2/linux/compiler/lib/intel64_lin/libiomp5.so`
+`export LD_PRELOAD=:/opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_core.so:/opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_intel_lp64.so:/opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_intel_thread.so:/opt/intel/oneapi/compiler/latest/linux/compiler/lib/intel64_lin/libiomp5.so`
 
-where ``/opt/intel'' is for the case of installing oneapi with root. If oneapi is installed in a user account, then this can be /home/user_name/intel/
+where ``/opt/intel'' is for the case of installing oneapi with root. If oneapi is installed in a user account, then ``/opt/intel'' can be ``/home/user_name/intel/'' or ``~/intel''
 
 # Citing fastSHT
 
