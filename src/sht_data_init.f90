@@ -293,8 +293,8 @@ subroutine sht_data_alloc(params)
     if (allocated(cu_streams)) then
        deallocate(cu_streams)
     endif
-    allocate(cu_streams(0:max(100, 3*nside )))
-    do m=0, lmax
+    allocate(cu_streams(0:max(100, 4*nside )))
+    do m=0, 4*nside
         stat = cudaStreamCreate(cu_streams(m))
     enddo
 #endif
