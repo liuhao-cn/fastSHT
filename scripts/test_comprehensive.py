@@ -21,18 +21,13 @@ import matplotlib.pyplot as plt
 import importlib
 importlib.reload(SHT)
 
-def test_t2alm(nside, lmax, nsim, test_cl, niter = 0, seed=23333, compare=True):
-    # print('Testing t2alm...')
+def test_t2alm(nside, lmax, nsim, niter=0, seed=23333, compare=True):
     np.random.seed(seed)
-    maps = np.asfortranarray(np.transpose([hp.sphtfunc.synfast(test_cl, nside, lmax)
-                 for i in range(nsim)]) )
-    #maps = np.save('maps_' + str(nsim) + '.npy', maps)
-    #maps = np.load('maps_' + str(nsim) + '.npy')
+    maps = np.asfortranarray(np.random.rand(npix, nsim))
+
     sht = SHT.SHT(nside, lmax, nsim, niter)
-    
-    start = time.time()
+
     alms = sht.t2alm_old(maps)
-    # print('Time cost for fastSHT is ' + str(time.time() - start))
 
     if(compare == False):
         return
@@ -42,35 +37,28 @@ def test_t2alm(nside, lmax, nsim, test_cl, niter = 0, seed=23333, compare=True):
     
     start = time.time()
     alms2_hp = np.array([hp.map2alm(maps[:,i], lmax=lmax, iter=niter) for i in range(nsim)])
-    # print('Time cost for healpy is ' + str(time.time() - start))
     
     cl = np.array([hp.alm2cl(alms_hp[:,i]) for i in range(nsim)])
     cl2 = np.array([hp.alm2cl(alms2_hp[i,:]) for i in range(nsim)])
     
     max_err = (np.abs(cl2 - cl) / cl2.mean()).max()
 
-    #print(cl[0,0:10])
-    #print(cl2[0,0:10])
     print('Max relative cl-TT error for the t2alm test is: ' + str(max_err))
     return max_err
 
 # In[5]:
 
 
-def test_qu2eb(nside, lmax, nsim, test_cl, niter = 0, seed=23333, compare=True):
-    # print('Testing qu2eb...')
+def test_qu2eb(nside, lmax, nsim, niter=0, seed=23333, compare=True):
     np.random.seed(seed)
-    Q = np.asfortranarray(np.transpose([hp.sphtfunc.synfast(test_cl, nside, lmax)
-                 for i in range(nsim)]) )
-    U = np.asfortranarray(np.transpose([hp.sphtfunc.synfast(test_cl, nside, lmax)
-                 for i in range(nsim)]) )
-    
+    T = np.asfortranarray(np.random.rand(npix, nsim))
+    Q = np.asfortranarray(np.random.rand(npix, nsim))
+    U = np.asfortranarray(np.random.rand(npix, nsim))
     
     sht = SHT.SHT(nside, lmax, nsim, niter, pol=True)
     
     start = time.time()
     almEs, almBs = sht.qu2eb(Q, U)
-    # print('Time cost for fastSHT is ' + str(time.time() - start))
 
     if(compare == False):
         return
@@ -80,12 +68,10 @@ def test_qu2eb(nside, lmax, nsim, test_cl, niter = 0, seed=23333, compare=True):
     almBs_hp = sht.convert_alm_healpy(almBs)
     almBs_hp = (almBs_hp[0,:,:] + 1j * almBs_hp[1,:,:])
     
-    
-    maps = np.asfortranarray( [np.transpose([hp.sphtfunc.synfast(test_cl, nside, lmax) for i in range(nsim)]), Q, U ])
+    maps = np.asfortranarray( [T, Q, U ] )
     
     start = time.time()
     alms2_hp = np.array([hp.map2alm(maps[:,:,i], lmax=lmax, iter=niter) for i in range(nsim)])
-    # print('Time cost for healpy is ' + str(time.time() - start))
     
     cl = np.array([hp.alm2cl(almEs_hp[:,i]) for i in range(nsim)])
     cl2 = np.array([hp.alm2cl(alms2_hp[i, 1, :]) for i in range(nsim)])
@@ -99,7 +85,6 @@ def test_qu2eb(nside, lmax, nsim, test_cl, niter = 0, seed=23333, compare=True):
     max_errB = (np.abs(cl2 - cl) / cl.mean()).max()
     print('Max relative cl-BB error in the qu2eb test is: ' + str(max_errB))
     return max_errE, max_errB
-# In[6]:
 
 
 def make_mask(nside, upper_lat = 5):
@@ -115,9 +100,6 @@ def make_mask(nside, upper_lat = 5):
 # In[7]:
 
 def fix_EB(Q, U, mask, nside, lmax, niter=0, seed=23333):
-    
-        
-    
     
     vid = (np.arange(len(mask))[mask == 1])
     nv = len(vid)
@@ -204,11 +186,10 @@ for i in range(nn):
     mm = len(lmax_list)
     for j in range(mm):
         lmax = lmax_list[j]
-        test_cl = np.array([1 for l in range(1, lmax+1)] )
         print(" ")
         print("Testing nside=%i, lmax=%i" %(nside, lmax))
-        errT = test_t2alm(nside, lmax, nsim, test_cl, niter=1, compare=True)
-        errE, errB = test_qu2eb(nside, lmax, nsim, test_cl, niter=1, compare=True)
+        errT = test_t2alm(nside, lmax, nsim, niter=1, compare=True)
+        errE, errB = test_qu2eb(nside, lmax, nsim, niter=1, compare=True)
         nside_rec.append(nside)
         lmax_rec.append(lmax)
         errT_rec.append(errT)
