@@ -18,6 +18,21 @@ Intel MKL library
 docker pull rectaflex/intel_nvidia_sdk
 ```
 
+To enable GPU in a docker container, the Nvidia container runtime is needed, and it can be installed by 
+
+```
+curl -s -L https://nvidia.github.io/nvidia-container-runtime/gpgkey |   sudo apt-key add -
+distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
+curl -s -L https://nvidia.github.io/nvidia-container-runtime/$distribution/nvidia-container-runtime.list |   sudo tee /etc/apt/sources.list.d/nvidia-container-runtime.list
+sudo apt-get update
+sudo apt-get install nvidia-container-runtime
+sudo systemctl restart docker
+```
+Finally, run the docker image with 
+```
+sudo docker run -it -v /home:/home --gpus all rectaflex/intel_nvidia_sdk
+```
+
 # Compilation
 
 ```
