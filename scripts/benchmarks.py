@@ -213,6 +213,6 @@ def test_qu2eb(seed=23333):
     print('Time cost for healpy is ' + str(time.time() - start))
     
 
-# test_t2alm()
+test_t2alm()
 # test_qu2eb()
-test_fix_EB()
+# test_fix_EB()
