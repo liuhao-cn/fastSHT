@@ -50,10 +50,10 @@ sudo docker run -it -v /home:/home --gpus all rectaflex/intel_nvidia_sdk
 ```
 
 ```
-./compile_ifort.sh # for general CPU version (might need to be modified to incorporate different machine)
+./compile_ifort.sh # for general CPU version without docker (might need to be modified to incorporate different machine)
 ```
 
-A known Issue:
+A known Issue for fastSHT-CPU without docker:
 
 If intel oneapi is installed with a user account, then one may need to run the following command before compiling:
 ```
@@ -62,7 +62,31 @@ export MKL_DIR=~/lib/cmake/mkl-xxxx.x.x/
 where xxxx.x.x is the mkl version number.
 
 # Examples and Testing
-General tests and comparisons with Healpy is in `scripts/test_all.py`.
+
+First go to folder ``scripts'', and then:
+
+A comprehensive test and accuracy comparisons with Healpy (may take a long time to run):
+```
+python test_comprehensive.py
+```
+
+A benchmark code:
+```
+python benchmarks.py
+```
+or specify the parameters in order of ``nside nsim n_proc niter comparison_flag'':
+```
+python benchmarks.py 128 1000 8 3 false
+```
+
+A test-and-benchmark code for the fix-EB job:
+```
+python test_fixEB.py
+```
+or specify the parameters in order of ``nside nsim n_proc niter comparison_flag'':
+```
+python test_fixEB.py 128 200 8 3 true
+```
 
 Notebook that demonstrates the basic interfaces is in  `scripts/demo.ipynb`.
 
