@@ -11,12 +11,18 @@ Intel MKL library
 
 `Python3`, `numpy`, `CMake`
 
+# Installation
 
-# (Recommended) Download and compile with the docker image that is compatable with both CPU and GPU version
+## (Recommended) Download and compile with the docker image compatable with both CPU and GPU version
+
+See https://docs.docker.com/engine/install/ for a docker installation instruction
+
+With docker installed, use
 
 ```
-docker pull rectaflex/intel_nvidia_sdk
+sudo docker pull rectaflex/intel_nvidia_sdk
 ```
+to pull the docker image.
 
 To enable GPU in a docker container, the Nvidia container runtime is needed, and it can be installed by 
 
@@ -28,19 +34,23 @@ sudo apt-get update
 sudo apt-get install nvidia-container-runtime
 sudo systemctl restart docker
 ```
-Finally, run the docker image with 
+Finally, run the docker image with
 ```
 sudo docker run -it -v /home:/home --gpus all rectaflex/intel_nvidia_sdk
 ```
 
-# Compilation
+## Compilation
 
 ```
-./compile.sh # for the CPU version
+./compile.sh # for the CPU version in docker
 ```
 
 ```
-./compile.sh -DGPU=on # for the GPU version
+./compile.sh -DGPU=on # for the GPU version in docker
+```
+
+```
+./compile_ifort.sh # for general CPU version (might need to be modified to incorporate different machine)
 ```
 
 A known Issue:
