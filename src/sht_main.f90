@@ -89,38 +89,65 @@ end
 
 
 
-! SUBROUTINE alm2t( alm, t )
-!     !DIR$ ATTRIBUTES FORCEINLINE :: set_locations
-!     use sht_data_module, only: nside, npix, lmax, nsim, nring, plm0, buff1, &
-!         nfft_arr, i1_arr, i2_arr
-!     implicit none
+SUBROUTINE alm2t( alm, t )
+    use sht_data_module
+#ifdef GPU
+    use cublas_v2
+    use cudafor
+#endif
+    implicit none
+  
+    ! Main input/output, alm is saved as a real-value square matrix
+    real(8), intent(out)  :: t(0:npix-1, 1:nsim) 
+    real(8), intent(in) :: alm(1:nsim, 0:lmax, 0:lmax)
+    integer(4) :: beginning, end, tot_beginning, tot_end
+    real(8) :: rate
 
-!     ! Main input/output, alm is saved as a real-value square matrix
-!     real(8), intent(in)   :: alm(1:nsim, 0:lmax, 0:lmax)
-!     real(8), intent(out)  :: t(0:npix-1, 1:nsim) 
+    ! scalar variables
+    integer(4)            :: m, i
+#ifdef GPU
+    integer  :: stat
+    d_alm = alm
+#endif
 
-!     ! scalar variables
-!     integer(4)            :: m, i
+    do m=0, lmax
+        call set_locations(m)
 
-!     do m=0, lmax
-!         call set_locations(m)
+        call get_plm_recursive(0, m)
 
-!         call get_plm_recursive(0, m)
-        
-!         call alm2mat( alm, plm0, m, 0, 0.d0)
+#ifdef GPU
+        call alm2mat( cu_streams(m), d_alm, plm0, m, 0, 0.d0)
+#else
+        call alm2mat( alm, plm0, m, 0, 0.d0)
+#endif
 
-!         call mat2fft_fast(buff1, m)
-!     enddo
+#ifdef GPU
+        call mat2fft_fast(d_buff1, m)
+#else
+        call mat2fft_fast(buff1, m)
+#endif
+
+    enddo
+
+
+    ! explicitly set the unused part of buff1 to zero
+    !$acc kernels loop
+    do i=0,nring-1
+#ifdef GPU
+       if(2*(lmax+1) .lt. h_nfft_arr(i)) d_buff1(:,2*(lmax+1)+h_i1_arr(i):h_i2_arr(i)) = 0
+#else
+       if(2*(lmax+1) .lt. nfft_arr(i)) buff1(:,2*(lmax+1)+i1_arr(i):i2_arr(i)) = 0
+#endif
+    enddo
+    !$acc end kernels
+
+#ifdef GPU
+    buff1 = d_buff1
+#endif
     
-!     ! explicitly set the unused part of buff1 to zero
-!     do i=0,nring-1
-!        if(2*(lmax+1) .lt. nfft_arr(i)) buff1(:,2*(lmax+1)+i1_arr(i):i2_arr(i)) = 0
-!     enddo
-
-!     call fft2map( buff1, t )
-
-!     return
-! end
+    call fft2map( buff1, t )
+    return
+end
 
 
 
