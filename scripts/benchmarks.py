@@ -5,12 +5,14 @@
 import sys as sys
 import os
 
+# default parameters
 nside = 64
 nsim = 2000
 n_proc = 8
 niter = 3
 compare = False
 
+# the command line input will overwrite the defaults
 if len(sys.argv)>1:
     nside = int(sys.argv[1])
 if len(sys.argv)>2:
@@ -24,8 +26,9 @@ if len(sys.argv)>5:
 
 print(" ")
 print("Working with the following parameters:")
-print("nside = %i, nsim = %i, n_proc = %i, niter = %i, comparison = %s" 
+print("Nside = %i, Nsim = %i, n_proc = %i, Niter = %i, comparison with HEALPix = %s" 
     %(nside, nsim, n_proc, niter, compare))
+print("Note: this test will only show the time cost. For accuracies use test_comprehensive.py")
 print(" ")
 
 os.environ["OMP_NUM_THREADS"] = str(n_proc) # export OMP_NUM_THREADS=4
@@ -48,28 +51,19 @@ import time
 import numba
 from numba import cuda
 
-
-# In[2]:
-
-
 import importlib
 importlib.reload(SHT)
 
-# In[3]:
 
-
+nrep = 3
 lmax = 3*nside - 1
 npix = 12 * nside ** 2
-test_cl = np.array([1 for l in range(1,lmax+1)] )
 
-def test_t2alm(nside, lmax, nsim, test_cl, niter = 0, seed=23333, compare=True):
+def test_t2alm(seed=23333):
     print('Testing t2alm...')
 
     np.random.seed(seed)
-    maps = np.asfortranarray(np.transpose([hp.sphtfunc.synfast(test_cl, nside, lmax)
-                 for i in range(nsim)]) )
-
-    #maps = np.load('maps_' + str(nsim) + '.npy')
+    maps = np.asfortranarray(np.random.rand(npix, nsim))
 
     start = time.time()
     sht = SHT.SHT(nside, lmax, nsim, niter)
@@ -79,26 +73,25 @@ def test_t2alm(nside, lmax, nsim, test_cl, niter = 0, seed=23333, compare=True):
     print('Time cost for memory initialization is ' + str(end))
 
     start = time.time()
-    for i in range(5):
+    for i in range(nrep):
         sht.t2alm_old(maps, alms)
     end = time.time() - start
-    print('Calculation time cost for fastSHT is ' + str(end / 5))
+    print('Calculation time cost for fastSHT is ' + str(end / nrep))
 
     #print(time.sleep(10))
     if(compare==False):
         return
-    alms_hp = sht.convert_alm_healpy(alms)
+    
+    alms_hp = sht.convert_alm_healpy(alms); del alms
     alms_hp = (alms_hp[0,:,:] + 1j * alms_hp[1,:,:])
-
-    del alms
     alm_shape = alms_hp.shape[0]
     del alms_hp
-    
+
     start = time.time()
+    #alms2_hp = np.array([hp.map2alm(maps[:,i], lmax=lmax, iter=niter) for i in range(nsim)])
     overhead = 0
     roverhead = 0
-    #alms2_hp = np.array([hp.map2alm(maps[:,i], lmax=lmax, iter=niter) for i in range(nsim)])
-    for j in range(5):
+    for j in range(nrep):
         for i in range(nsim):
             ostart = time.time()
             maps[:,i].astype(np.float64, order='C', copy=True)
@@ -110,16 +103,8 @@ def test_t2alm(nside, lmax, nsim, test_cl, niter = 0, seed=23333, compare=True):
             hp.map2alm(maps[:,i], lmax=lmax, iter=niter)
 
     tot_time = time.time() - start
-    print('Time cost for memory initialization is ' + str(roverhead/5))
-    print('Calculation time cost for healpy is ' + str((tot_time - overhead)/5 ))
-    #print('Total time cost for healpy is ' + str(tot_time/5))
-    
-    # cl = np.array([hp.alm2cl(alms_hp[:,i]) for i in range(nsim)])
-    # cl2 = np.array([hp.alm2cl(alms2_hp[i,:]) for i in range(nsim)])
-    
-    # max_err = (np.abs(cl2 - cl) / cl2.mean()).max()
-
-    # print('Max relative error in cl is: ' + str(max_err))
+    print('Time cost for memory initialization is ' + str(roverhead/nrep))
+    print('Calculation time cost for healpy is ' + str((tot_time - overhead)/nrep ))
 
 
 def make_mask(nside, upper_lat = 5):
@@ -136,11 +121,12 @@ def make_mask(nside, upper_lat = 5):
 
 def fix_EB(Q, U, mask, nside, lmax, niter=0, seed=23333):
     
-            
+    T = np.asfortranarray(np.random.rand(npix, nsim))
+
     vid = (np.arange(len(mask))[mask == 1])
     nv = len(vid)
 
-    maps_in = np.array( [np.transpose([hp.sphtfunc.synfast(test_cl, nside, lmax) for i in range(nsim)]), Q, U ])
+    maps_in = np.array( [T, Q, U ])
     maps_in[:,mask==0,:] = hp.UNSEEN
     
     start = time.time()
@@ -171,17 +157,15 @@ def fix_EB(Q, U, mask, nside, lmax, niter=0, seed=23333):
         
         BC[i, vid] = BO[i, vid] - BT[i, vid] * coe[0] - coe[1]
         
-    print('Time cost for Healpy is ' + str(time.time() - start))
+    # print('Time cost for Healpy is ' + str(time.time() - start))
     return BC
 
-def test_fix_EB(nside, lmax, niter=0, seed=23333, compare=True):
+def test_fix_EB(seed=23333):
     npix = 12*nside**2
     print('Testing fix_EB...')
     np.random.seed(seed)
-    Q = np.asfortranarray(np.transpose([hp.sphtfunc.synfast(test_cl, nside, lmax)
-                 for i in range(nsim)]) )
-    U = np.asfortranarray(np.transpose([hp.sphtfunc.synfast(test_cl, nside, lmax)
-                 for i in range(nsim)]) )
+    Q = np.asfortranarray(np.random.rand(npix, nsim))
+    U = np.asfortranarray(np.random.rand(npix, nsim))
     
     mask = make_mask(nside)
 
@@ -193,23 +177,20 @@ def test_fix_EB(nside, lmax, niter=0, seed=23333, compare=True):
     if(compare == False):
         return
     
-    
+    start = time.time()
     BC = fix_EB(Q, U, mask, nside, lmax, niter, seed)
+    print('Time cost for healpy is ' + str(time.time() - start))
 
-    cl = np.array([hp.anafast(Bmap[:,i]) for i in range(nsim)])
-    cl2 = np.array([hp.anafast(BC[i,:]) for i in range(nsim)])
-    max_err = (np.abs(cl2 - cl) / cl.mean()).max()
-    print('Max relative error in clB is: ' + str(max_err))    
     return (Bmap, BC)
 
-def test_qu2eb(nside, lmax, nsim, test_cl, niter = 0, seed=23333, compare=True):
+def test_qu2eb(seed=23333):
+
     print('Testing qu2eb...')
     np.random.seed(seed)
-    Q = np.asfortranarray(np.transpose([hp.sphtfunc.synfast(test_cl, nside, lmax)
-                 for i in range(nsim)]) )
-    U = np.asfortranarray(np.transpose([hp.sphtfunc.synfast(test_cl, nside, lmax)
-                 for i in range(nsim)]) )
     
+    T = np.asfortranarray(np.random.rand(npix, nsim))
+    Q = np.asfortranarray(np.random.rand(npix, nsim))
+    U = np.asfortranarray(np.random.rand(npix, nsim))
     
     sht = SHT.SHT(nside, lmax, nsim, niter, pol=True)
     
@@ -225,28 +206,13 @@ def test_qu2eb(nside, lmax, nsim, test_cl, niter = 0, seed=23333, compare=True):
     almBs_hp = sht.convert_alm_healpy(almBs)
     almBs_hp = (almBs_hp[0,:,:] + 1j * almBs_hp[1,:,:])
     
-    
-    maps = np.asfortranarray( [np.transpose([hp.sphtfunc.synfast(test_cl, nside, lmax) for i in range(nsim)]), Q, U ])
+    maps = np.asfortranarray( [T, Q, U ])
     
     start = time.time()
     alms2_hp = np.array([hp.map2alm(maps[:,:,i], lmax=lmax, iter=niter) for i in range(nsim)])
     print('Time cost for healpy is ' + str(time.time() - start))
     
-    cl = np.array([hp.alm2cl(almEs_hp[:,i]) for i in range(nsim)])
-    cl2 = np.array([hp.alm2cl(alms2_hp[i, 1, :]) for i in range(nsim)])
-    
-    max_err = (np.abs(cl2 - cl) / cl.mean()).max()
-    print('Max relative error in clE is: ' + str(max_err))
-    
-    cl = np.array([hp.alm2cl(almBs_hp[:,i]) for i in range(nsim)])
-    cl2 = np.array([hp.alm2cl(alms2_hp[i, 2, :]) for i in range(nsim)])
-    
-    max_err = (np.abs(cl2 - cl) / cl.mean()).max()
-    print('Max relative error in clB is: ' + str(max_err))
-# In[6]:
 
-    
-#test_t2alm(nside, lmax, nsim, np.array([1 for l in range(1,lmax+1)] ), niter=niter, compare=compare)
-
-#test_qu2eb(nside, lmax, nsim, np.array([1 for l in range(1,lmax+1)] ), niter=niter, compare=compare)
-test_fix_EB(nside, lmax, niter, compare=compare)
+# test_t2alm()
+# test_qu2eb()
+test_fix_EB()
