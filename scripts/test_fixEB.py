@@ -23,6 +23,11 @@ if len(sys.argv)>4:
 if len(sys.argv)>5:
     compare = sys.argv[5].lower() == "true"
 
+print(" ")
+print("Working with the following parameters:")
+print("Nside = %i, Nsim = %i, n_proc = %i, Niter = %i, comparison with HEALPix = %s" 
+    %(nside, nsim, n_proc, niter, compare))
+print(" ")
 
 os.environ["OMP_NUM_THREADS"] = str(n_proc) # export OMP_NUM_THREADS=4
 os.environ["OPENBLAS_NUM_THREADS"] = str(n_proc) # export OPENBLAS_NUM_THREADS=4 
