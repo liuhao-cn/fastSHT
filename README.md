@@ -74,7 +74,7 @@ A benchmark code:
 ```
 python benchmarks.py
 ```
-or specify the parameters manually:
+or specify the parameters in order of ``nside nsim n_proc niter comparison_flag'':
 ```
 python benchmarks.py 128 1000 8 3 false
 ```
@@ -83,7 +83,7 @@ A test-and-benchmark code for the fix-EB job:
 ```
 python test_fixEB.py
 ```
-or specify the parameters manually:
+or specify the parameters in order of ``nside nsim n_proc niter comparison_flag'':
 ```
 python test_fixEB.py 128 200 8 3 true
 ```
