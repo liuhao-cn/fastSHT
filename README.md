@@ -92,7 +92,7 @@ Notebook that demonstrates the basic interfaces is in  `scripts/demo.ipynb`.
 
 # FAQs
 
-## Linking errors associated with Intel MKL
+## Linking errors associated with Intel MKL (for installation without docker)
 
 Try pre-load some MKL libraries by
 
