@@ -15,9 +15,14 @@ Intel MKL library
 
 ## (Recommended) Download and compile with the docker image compatable with both CPU and GPU version
 
+See https://docs.docker.com/engine/install/ for a docker installation instruction
+
+With docker installed, use
+
 ```
 sudo docker pull rectaflex/intel_nvidia_sdk
 ```
+to pull the docker image.
 
 To enable GPU in a docker container, the Nvidia container runtime is needed, and it can be installed by 
 
