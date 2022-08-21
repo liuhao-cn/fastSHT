@@ -66,6 +66,19 @@ class SHT:
             fastSHT.t2alm_iter(maps, alms, self.niter)
         return alms
 
+    def alm2t(self, alms, maps_in=None):
+        if(maps_in is None):
+            try:
+                maps = numba.cuda.pinned_array((self.npix, self.nsim), dtype=np.double, strides=None, order='F')
+            except:
+                maps = np.ones((self.npix, self.nsim), dtype=np.double, order='F')
+                
+        fastSHT.alm2t( alms, maps)
+        if(maps_in is None):
+            return maps
+        else:
+            return 0
+
     def t2alm_old(self, maps, alms_in=None):
         #alms = np.ones((self.nsim, self.lmax+1, self.lmax+1), order='F')
         if(alms_in is None):
