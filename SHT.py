@@ -114,6 +114,19 @@ class SHT:
                 
         return (almEs, almBs)
 
+    def eb2qu(self, almEs, almBs):
+        try:
+            Q = numba.cuda.pinned_array((self.npix, self.nsim), dtype=np.double, strides=None, order='F')
+            U = numba.cuda.pinned_array((self.npix, self.nsim), dtype=np.double, strides=None, order='F')
+        except:
+            Q = np.ones((self.npix, self.nsim), order='F')
+            U = np.ones((self.npix, self.nsim), order='F')
+
+
+        fastSHT.eb2qu(almEs, almBs, Q, U)
+                
+        return (Q, U)
+
     def fix_eb(self, Q, U, mask):
         vid = (np.arange(len(mask))[mask == 1])
         nv = len(vid)
