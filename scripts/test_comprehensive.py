@@ -41,10 +41,15 @@ def test_t2alm(nside, lmax, nsim, niter=0, seed=23333, compare=True):
     cl = np.array([hp.alm2cl(alms_hp[:,i]) for i in range(nsim)])
     cl2 = np.array([hp.alm2cl(alms2_hp[i,:]) for i in range(nsim)])
     
-    max_err = (np.abs(cl2 - cl) / cl2.mean()).max()
+    max_errTT = (np.abs(cl2 - cl) / cl2.mean()).max()
 
-    print('Max relative cl-TT error for the t2alm test is: ' + str(max_err))
-    return max_err
+    maps1 = sht.alm2t(alms)
+    maps2 = np.array([hp.alm2map(alms_hp[:,i], nside, pol=False) for i in range(nsim)])
+    max_errT = (np.abs(maps1-maps2.transpose())/np.std(maps2)).max()
+
+    print('Max relative map-T error for the alm2t test is: ' + str(max_errT ))
+    print('Max relative cl-TT error for the t2alm test is: ' + str(max_errTT))
+    return max_errT, max_errTT
 
 # In[5]:
 
@@ -92,7 +97,7 @@ nsim = 8
 nn = len(nside_list)
 max_err = 0
 
-nside_rec, lmax_rec, errT_rec, errE_rec, errB_rec = [], [], [], [], []
+nside_rec, lmax_rec, errT_rec, errTT_rec, errE_rec, errB_rec = [], [], [], [], [], []
 for i in range(nn):
     nside = nside_list[i]
     npix = 12 * nside ** 2
@@ -103,19 +108,20 @@ for i in range(nn):
         lmax = lmax_list[j]
         print(" ")
         print("Testing nside=%i, lmax=%i" %(nside, lmax))
-        errT = test_t2alm(nside, lmax, nsim, niter=1, compare=True)
+        errT, errTT = test_t2alm(nside, lmax, nsim, niter=1, compare=True)
         errE, errB = test_qu2eb(nside, lmax, nsim, niter=1, compare=True)
         nside_rec.append(nside)
         lmax_rec.append(lmax)
         errT_rec.append(errT)
+        errTT_rec.append(errTT)
         errE_rec.append(errE)
         errB_rec.append(errB)
 
-print("%16s %16s %16s %16s %16s" %("Nside", "Lmax", "Err_T", "Err_E", "Err_B"))
+print("%16s %16s %16s %16s %16s %16s" %("Nside", "Lmax", "Err_T", 'Err_TT', "Err_E", "Err_B"))
 for i in range(len(nside_rec)):
-    print("%16i %16i %16.5e %16.5e %16.5e" %(nside_rec[i], lmax_rec[i], errT_rec[i], errE_rec[i], errB_rec[i]))
+    print("%16i %16i %16.5e %16.5e %16.5e %16.5e" %(nside_rec[i], lmax_rec[i], errT_rec[i], errTT_rec[i], errE_rec[i], errB_rec[i]))
 
-buff = np.array([errT_rec, errE_rec, errB_rec])
+buff = np.array([errT_rec, errTT_rec, errE_rec, errB_rec])
 print("*********************************************************")
 print("Summary: the maximum relative error in all tests is: %16.6e" %(np.amax(buff)))
 print("*********************************************************")
