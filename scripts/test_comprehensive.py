@@ -86,7 +86,7 @@ def test_qu2eb(seed=23333):
     return max_errQ, max_errU, max_errEE, max_errBB
 
 
-nside_list = [32]#, 128, 1024]
+nside_list = [32, 128, 1024]
 nsim = 8
 niter = 1
 max_err = 0
