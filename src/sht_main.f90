@@ -162,61 +162,97 @@ end
 
 
 
-! ! Similar to t2alm_iter, but use "immediate update" to improve the accuracy.
-! SUBROUTINE t2alm_iter( t, alm, niter )
-!     !DIR$ ATTRIBUTES FORCEINLINE :: set_locations
-!     use sht_data_module, only: nside, npix, lmax, nsim, nring, plm0, buff1, buff2
-!     implicit none
+! Similar to t2alm_iter, but use "immediate update" to improve the accuracy.
+SUBROUTINE t2alm_iter( t, alm, niter )
+    use sht_data_module
+#ifdef GPU
+    use cublas_v2
+    use cudafor
+#endif
+    implicit none
 
-!     ! Main input/output, alm is saved as a real-value square matrix
-!     real(8), intent(in)     :: t(0:npix-1, 1:nsim)
-!     real(8), intent(out)    :: alm(1:nsim, 0:lmax, 0:lmax)
+    ! Main input/output, alm is saved as a real-value square matrix
+    real(8), intent(in)     :: t(0:npix-1, 1:nsim)
+    real(8), intent(out)    :: alm(1:nsim, 0:lmax, 0:lmax)
 
-!     ! scalar variables
-!     integer(4), intent(in)  :: niter
-!     integer(4)              :: m, i
+    ! scalar variables
+    integer(4), intent(in)  :: niter
+    integer(4)              :: m, i
 
-!     call map2fft( t, buff1 )
+#ifdef GPU
+    integer  :: stat
+#endif
 
-!     ! compute initial alm
-!     do m=0, lmax
-!         call set_locations(m)
+#ifdef GPU
+    call map2fft( t, buff1, d_buff1)
+#else
+    call map2fft( t, buff1 )
+#endif
+
+    ! compute initial alm
+    do m=0, lmax
+        call set_locations(m)
         
-!         call get_plm_recursive(0, m)
+        call get_plm_recursive(0, m)
+#ifdef GPU
 
-!         call fft2mat_fast(buff1, m)
+        call fft2mat_fast(d_buff1, m)
+#else
+        call fft2mat_fast(buff1, m)
+#endif
+#ifdef GPU
 
-!         call mat2alm( alm, plm0, m, 0, 0.d0)
-!     enddo
+        call mat2alm(cu_streams(m), d_alm,  plm0, m, 0, 0.d0)
+#else
+        call mat2alm(alm,  plm0, m, 0, 0.d0)
+#endif
+    enddo
 
-!     ! start iteration
-!     do i=1,niter
+    ! start iteration
+    do i=1,niter
         
-!         do m=0, lmax
-!             call set_locations(m)
+        do m=0, lmax
+            call set_locations(m)
             
-!             call get_plm_recursive(0, m)
+            call get_plm_recursive(0, m)
 
-!             call alm2mat( alm, plm0, m, 0, 0.d0)
+#ifdef GPU
+            call alm2mat(cu_streams(m), d_alm, plm0, m, 0, 0.d0)
+#else
+            call alm2mat( alm, plm0, m, 0, 0.d0)
+#endif
+#ifdef GPU
+            call mat2fft_fast_iter(d_buff1, d_buff2, m)
+#else
+            call mat2fft_fast_iter(buff1, buff2, m)
+#endif
+        !-----------------------------------------------------------
+        ! The new and old iteration codes are different by the following 4 lines
+        ! (new = without them, old = with them)
+        !-----------------------------------------------------------
+        ! enddo
+        ! do m=0, lmax
+        !     call set_locations(m)
+        !     call get_plm_recursive(0, m)
+#ifdef GPU
+            call fft2mat_fast(d_buff2, m)            
+#else
+            call fft2mat_fast(buff2, m)
+#endif
 
-!             call mat2fft_fast_iter(buff1, buff2, m)    
-!         !-----------------------------------------------------------
-!         ! The new and old iteration codes are different by the following 4 lines
-!         ! (new = without them, old = with them)
-!         !-----------------------------------------------------------
-!         ! enddo
-!         ! do m=0, lmax
-!         !     call set_locations(m)
-!         !     call get_plm_recursive(0, m)
-!             call fft2mat_fast(buff2, m)
+#ifdef GPU
+            call mat2alm(cu_streams(m), d_alm,  plm0, m, 0, 1.d0)
+#else
+            call mat2alm(alm,  plm0, m, 0, 1.d0)
+#endif
+        enddo
+    enddo
+#ifdef GPU
+    alm = d_alm
+#endif
 
-!             call mat2alm( alm, plm0, m, 0, 1.d0)
-!         enddo
-
-!     enddo
-
-!     return 
-! end
+    return 
+end
 
 
 
