@@ -102,4 +102,4 @@ where ``/opt/intel'' is for the case of installing oneapi with root. If oneapi i
 
 # Citing fastSHT
 
-...
+``Accelerating spherical harmonic transforms for a large number of sky maps'', Chi Tian, Siyu Li, and Hao Liu, https://arxiv.org/abs/2208.10154
