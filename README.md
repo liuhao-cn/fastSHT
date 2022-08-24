@@ -78,7 +78,16 @@ sudo apt install intel-basekit
 sudo apt install intel-hpckit
 
 sed -i '1 i\source /opt/intel/oneapi/setvars.sh > /dev/null' ~/.bashrc
+source ~/.bashrc
 
+# installing healpy and f90wrap
+pip3 install healpy
+pip3 install f90wrap
+```
+
+If no GPU is going to be employed, the fastSHT can be compiled with CPU only using the script `./compile_ifort.sh`. If some MKL linking errors are encounted, see FAQs for solutions.
+
+```
 # installing nvidia hpc sdk
 
 echo 'deb [trusted=yes] https://developer.download.nvidia.com/hpc-sdk/ubuntu/amd64 /' | sudo tee /etc/apt/sources.list.d/nvhpc.list
@@ -91,25 +100,23 @@ sed -i '1 i\export PATH="/opt/nvidia/hpc_sdk/Linux_x86_64/2022/compilers/bin/:$P
 
 source ~/.bashrc
 
-# installing healpy and f90wrap
-
-pip3 install healpy
-pip3 install f90wrap
 
 ```
 
 ## 2.2 Compilation
 
-```
-./compile.sh # for the CPU version in docker
-```
+If BOTH Intel API and Nvidia SDK are installed, use
 
 ```
-./compile.sh -DGPU=on # for the GPU version in docker
+./compile.sh # for the CPU version
+```
+```
+./compile.sh -DGPU=on # for the GPU version
 ```
 
+If only Intel API is installed, use
 ```
-./compile_ifort.sh # for general CPU version without docker (might need to be modified to incorporate different machine)
+./compile_ifort.sh # for general CPU version (see FAQs if linking errors are encountered)
 ```
 
 A known Issue for fastSHT-CPU without docker:
@@ -157,7 +164,7 @@ Try pre-load some MKL libraries by
 
 `export LD_PRELOAD=:/opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_core.so:/opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_intel_lp64.so:/opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_intel_thread.so:/opt/intel/oneapi/compiler/latest/linux/compiler/lib/intel64_lin/libiomp5.so`
 
-where ``/opt/intel'' is for the case of installing oneapi with root. If oneapi is installed in a user account, then ``/opt/intel'' can be ``/home/user_name/intel/'' or ``~/intel''
+where `/opt/intel` is for the case of installing oneapi with root. If oneapi is installed in a user account, then `/opt/intel` can be `/home/user_name/intel/` or `~/intel`
 
 # 5. Citing fastSHT
 
