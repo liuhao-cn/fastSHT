@@ -16,7 +16,7 @@ Intel One API (2022.0.2)
 
 Nvidia HPC SDK (22.3)
 
-[`f90wrap (v0.2.7)`]  (https://github.com/jameskermode/f90wrap)
+`f90wrap (v0.2.7)`  (https://github.com/jameskermode/f90wrap)
 
 `Python3 (3.9.7)`, `numpy (1.21.2)`, `CMake(3.22.1)`
 
