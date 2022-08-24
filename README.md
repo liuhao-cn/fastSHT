@@ -13,7 +13,12 @@ Intel MKL library
 
 # Installation
 
-## (Recommended) Download and compile with the docker image compatable with both CPU and GPU version
+
+## Before compilation 
+
+Dependencies and system PATH should be configured properly. 
+
+### (Recommended) Download and compile with the docker image compatable with both CPU and GPU version
 
 See https://docs.docker.com/engine/install/ for a docker installation instruction
 
@@ -39,9 +44,9 @@ Finally, run the docker image with
 sudo docker run -it -v /home:/home --gpus all rectaflex/intel_nvidia_sdk
 ```
 
-## Installation for general Debian
+### Environment preparation for ubuntu
 
-Here we give a sample script for building a compilation environment for fastSHT based on an ubuntu-20.04
+For non-docker users, we give a sample script for building a compilation environment for fastSHT based on an ubuntu-20.04.
 
 ```
 sudo apt update
