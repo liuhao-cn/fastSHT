@@ -5,13 +5,15 @@ fastSHT is a very fast toolkit for doing spherical harmonic transforms on a larg
 
 # 1. Dependencies
 
-Fortran compiler: `ifort` is recommanded for the CPU version; `nvfortran` is required for the GPU version
+Fortran compiler: `ifort` is recommanded for the CPU version; `nvfortran` is required for the GPU version. The softwares and their versions we used for our tests are listed below:
 
-Intel MKL library
+Intel One API (2022.0.2)
 
-[`f90wrap`](https://github.com/jameskermode/f90wrap)
+Nvidia HPC SDK (22.3)
 
-`Python3`, `numpy`, `CMake`
+[`f90wrap (v0.2.7)`]  (https://github.com/jameskermode/f90wrap)
+
+`Python3 (3.9.7)`, `numpy (1.21.2)`, `CMake(3.22.1)`
 
 # 2. Installation
 
