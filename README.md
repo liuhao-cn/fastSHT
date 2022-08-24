@@ -115,7 +115,7 @@ source ~/.bashrc
 
 ## 2.2 Compilation
 
-If BOTH Intel API and Nvidia SDK are installed, use
+If BOTH Intel oneAPI and Nvidia SDK are installed, use
 
 ```
 ./compile.sh # for the CPU version
@@ -124,7 +124,7 @@ If BOTH Intel API and Nvidia SDK are installed, use
 ./compile.sh -DGPU=on # for the GPU version
 ```
 
-If only Intel API is installed, use
+If only Intel oneAPI is installed, use
 ```
 ./compile_ifort.sh # for general CPU version (see FAQs if linking errors are encountered)
 ```
