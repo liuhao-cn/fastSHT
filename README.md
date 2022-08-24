@@ -138,7 +138,7 @@ A comprehensive test and accuracy comparisons with Healpy (may take a long time 
 python test_comprehensive.py
 ```
 
-A benchmark code:
+A benchmark code with default parameters:
 ```
 python benchmarks.py
 ```
@@ -147,7 +147,7 @@ or specify the parameters in order of ``nside nsim n_proc niter comparison_flag'
 python benchmarks.py 128 1000 8 3 false
 ```
 
-A test-and-benchmark code for the fix-EB job:
+A test-and-benchmark code for the fix-EB job with default parameters:
 ```
 python test_fixEB.py
 ```
