@@ -99,9 +99,9 @@ echo 'deb [trusted=yes] https://developer.download.nvidia.com/hpc-sdk/ubuntu/amd
 
 sudo apt-get update -y
 
-sudo apt-get install -y nvhpc-22-7
+sudo apt-get install -y nvhpc-22-3
 
-sed -i '1 i\export PATH="/opt/nvidia/hpc_sdk/Linux_x86_64/2022/compilers/bin/:$PATH"' ~/.bashrc
+sed -i '1 i\export PATH="/opt/nvidia/hpc_sdk/Linux_x86_64/22.3/compilers/bin/:$PATH"' ~/.bashrc
 
 source ~/.bashrc
 
