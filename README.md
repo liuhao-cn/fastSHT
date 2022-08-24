@@ -39,6 +39,58 @@ Finally, run the docker image with
 sudo docker run -it -v /home:/home --gpus all rectaflex/intel_nvidia_sdk
 ```
 
+## Installation for general Debian
+
+Here we give a sample script for building a compilation environment for fastSHT based on an ubuntu-20.04
+
+```
+sudo apt update
+
+sudo apt -y install pkg-config sudo build-essential
+
+# installing recent cmake
+sudo apt-get install apt-transport-https ca-certificates gnupg software-properties-common wget
+
+wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | sudo apt-key add -
+
+sudo apt-add-repository 'deb https://apt.kitware.com/ubuntu/ bionic main'
+sudo apt-get update
+
+sudo apt-get install cmake
+
+# Installing intel-one-api
+
+wget -O- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB \
+| gpg --dearmor | sudo tee /usr/share/keyrings/oneapi-archive-keyring.gpg > /dev/null
+
+echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt.repos.intel.com/oneapi all main" | sudo tee /etc/apt/sources.list.d/oneAPI.list
+
+sudo apt-get update
+
+sudo apt install intel-basekit
+sudo apt install intel-hpckit
+
+sed -i '1 i\source /opt/intel/oneapi/setvars.sh > /dev/null' ~/.bashrc
+
+# installing nvidia hpc sdk
+
+echo 'deb [trusted=yes] https://developer.download.nvidia.com/hpc-sdk/ubuntu/amd64 /' | sudo tee /etc/apt/sources.list.d/nvhpc.list
+
+sudo apt-get update -y
+
+sudo apt-get install -y nvhpc-22-7
+
+sed -i '1 i\export PATH="/opt/nvidia/hpc_sdk/Linux_x86_64/2022/compilers/bin/:$PATH"' ~/.bashrc
+
+source ~/.bashrc
+
+# installing healpy and f90wrap
+
+pip3 install healpy
+pip3 install f90wrap
+
+```
+
 ## Compilation
 
 ```
