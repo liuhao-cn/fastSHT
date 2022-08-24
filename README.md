@@ -1,7 +1,9 @@
+# 0. Introduction
+
 fastSHT is a very fast toolkit for doing spherical harmonic transforms on a large number of spherical maps. It converts massive SHT operations to a BLAS level 3 problem and uses the highly optimized matrix multiplication toolkit to accelerate the computation. GPU acceleration is supported and can be very effective. Core code is written in fortran but a Python wrapper is provided and recommended.
 
 
-# Dependencies
+# 1. Dependencies
 
 Fortran compiler: `ifort` is recommanded for the CPU version; `nvfortran` is required for the GPU version
 
@@ -11,14 +13,14 @@ Intel MKL library
 
 `Python3`, `numpy`, `CMake`
 
-# Installation
+# 2. Installation
 
 
-## Before compilation 
+## 2.1 Before compilation 
 
 Dependencies and system PATH should be configured properly. 
 
-### (Recommended) Download and compile with the docker image compatable with both CPU and GPU version
+### 2.1.1 Environment preparation with docker (much easier)
 
 See https://docs.docker.com/engine/install/ for a docker installation instruction
 
@@ -44,7 +46,7 @@ Finally, run the docker image with
 sudo docker run -it -v /home:/home --gpus all rectaflex/intel_nvidia_sdk
 ```
 
-### Environment preparation for ubuntu
+### 2.1.2 Environment preparation for ubuntu (no docker)
 
 For non-docker users, we give a sample script for building a compilation environment for fastSHT based on an ubuntu-20.04.
 
@@ -96,7 +98,7 @@ pip3 install f90wrap
 
 ```
 
-## Compilation
+## 2.2 Compilation
 
 ```
 ./compile.sh # for the CPU version in docker
@@ -118,7 +120,7 @@ export MKL_DIR=~/lib/cmake/mkl-xxxx.x.x/
 ```
 where xxxx.x.x is the mkl version number.
 
-# Examples and Testing
+# 3. Examples and Testing
 
 First go to folder ``scripts'', and then:
 
@@ -147,7 +149,7 @@ python test_fixEB.py 128 200 8 3 true
 
 Notebook that demonstrates the basic interfaces is in  `scripts/demo.ipynb`.
 
-# FAQs
+# 4. FAQs
 
 ## Linking errors associated with Intel MKL (for installation without docker)
 
@@ -157,6 +159,6 @@ Try pre-load some MKL libraries by
 
 where ``/opt/intel'' is for the case of installing oneapi with root. If oneapi is installed in a user account, then ``/opt/intel'' can be ``/home/user_name/intel/'' or ``~/intel''
 
-# Citing fastSHT
+# 5. Citing fastSHT
 
 ``Accelerating spherical harmonic transforms for a large number of sky maps'', Chi Tian, Siyu Li, and Hao Liu, https://arxiv.org/abs/2208.10154
