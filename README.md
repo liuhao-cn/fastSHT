@@ -85,7 +85,10 @@ pip3 install healpy
 pip3 install f90wrap
 ```
 
-If no GPU is going to be employed, the fastSHT can be compiled with CPU only using the script `./compile_ifort.sh`. If some MKL linking errors are encounted, see FAQs for solutions.
+If no GPU is going to be employed, one can stop here and compile the fastSHT with CPU only using the script `./compile_ifort.sh`. 
+If some MKL linking errors are encounted, see FAQs for solutions.
+
+To continue with GPU support:
 
 ```
 # installing nvidia hpc sdk
@@ -119,14 +122,6 @@ If only Intel API is installed, use
 ./compile_ifort.sh # for general CPU version (see FAQs if linking errors are encountered)
 ```
 
-A known Issue for fastSHT-CPU without docker:
-
-If intel oneapi is installed with a user account, then one may need to run the following command before compiling:
-```
-export MKL_DIR=~/lib/cmake/mkl-xxxx.x.x/
-```
-where xxxx.x.x is the mkl version number.
-
 # 3. Examples and Testing
 
 First go to folder ``scripts'', and then:
@@ -158,13 +153,21 @@ Notebook that demonstrates the basic interfaces is in  `scripts/demo.ipynb`.
 
 # 4. FAQs
 
-## Linking errors associated with Intel MKL (for installation without docker)
+## 4.1 Linking errors associated with Intel MKL (for installation without docker)
 
 Try pre-load some MKL libraries by
 
 `export LD_PRELOAD=:/opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_core.so:/opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_intel_lp64.so:/opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_intel_thread.so:/opt/intel/oneapi/compiler/latest/linux/compiler/lib/intel64_lin/libiomp5.so`
 
 where `/opt/intel` is for the case of installing oneapi with root. If oneapi is installed in a user account, then `/opt/intel` can be `/home/user_name/intel/` or `~/intel`
+
+## 4.2 A known Issue for fastSHT (CPU only) without docker:
+
+If intel oneapi is installed with a user account, then one may need to run the following command before compiling:
+```
+export MKL_DIR=~/lib/cmake/mkl-xxxx.x.x/
+```
+where xxxx.x.x is the mkl version number.
 
 # 5. Citing fastSHT
 
