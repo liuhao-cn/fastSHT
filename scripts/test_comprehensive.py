@@ -87,7 +87,7 @@ def test_qu2eb(seed=23333):
 
 
 nside_list = [32, 128, 1024]
-nsim = 8
+nsim = 4
 niter = 1
 max_err = 0
 
