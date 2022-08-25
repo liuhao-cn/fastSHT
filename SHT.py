@@ -58,29 +58,7 @@ class SHT:
         fastSHT.sht_data_alloc(np.array((self.nside, self.lmax, self.nring, self.nsim, self.nbuff, self.pol), dtype=np.int32))
         fastSHT.sht_set_data(ring_tab[:lmax+1],plm_pos, plm_val1, plm_val2, theta, phi0)
         
-    def t2alm(self, maps):
-        alms = np.ones((self.nsim, self.lmax+1, self.lmax+1), order='F')
-        if(self.niter == 0):
-            fastSHT.t2alm(maps, alms)
-        else:
-            fastSHT.t2alm_iter(maps, alms, self.niter)
-        return alms
-
-    def alm2t(self, alms, maps_in=None):
-        if(maps_in is None):
-            try:
-                maps = numba.cuda.pinned_array((self.npix, self.nsim), dtype=np.double, strides=None, order='F')
-            except:
-                maps = np.ones((self.npix, self.nsim), dtype=np.double, order='F')
-                
-        fastSHT.alm2t( alms, maps)
-        if(maps_in is None):
-            return maps
-        else:
-            return 0
-
-    def t2alm_old(self, maps, alms_in=None):
-        #alms = np.ones((self.nsim, self.lmax+1, self.lmax+1), order='F')
+    def t2alm(self, maps, alms_in=None, method='old'):
         if(alms_in is None):
             try:
                 alms = numba.cuda.pinned_array((self.nsim, self.lmax+1, self.lmax+1), dtype=np.double, strides=None, order='F')
@@ -88,32 +66,89 @@ class SHT:
                 alms = np.ones((self.nsim, self.lmax+1, self.lmax+1), dtype=np.double, order='F')
         else:
             alms = alms_in
-        #start = time.time()
+
         if(self.niter == 0):
             fastSHT.t2alm(maps, alms)
-        else:
+        elif(method == 'old'):
             fastSHT.t2alm_iter_old(maps, alms, self.niter)
-        #print('Time cost for calculation only fastSHT is ' + str(time.time() - start))
+        else:
+            fastSHT.t2alm_iter(maps, alms, self.niter)
+
         if(alms_in is None):
             return alms
         else:
             return 0
 
-    def qu2eb(self, Q, U):
-        try:
-            almEs = numba.cuda.pinned_array((self.nsim, self.lmax+1, self.lmax+1), dtype=np.double, strides=None, order='F')
-            almBs = numba.cuda.pinned_array((self.nsim, self.lmax+1, self.lmax+1), dtype=np.double, strides=None, order='F')
-        except:
-            almEs = np.ones((self.nsim, self.lmax+1, self.lmax+1), order='F')
-            almBs = np.ones((self.nsim, self.lmax+1, self.lmax+1), order='F')
+    def alm2t(self, alms, maps_in=None):
+        if(maps_in is None):
+            try:
+                maps = numba.cuda.pinned_array((self.npix, self.nsim), dtype=np.double, strides=None, order='F')
+            except:
+                maps = np.ones((self.npix, self.nsim), dtype=np.double, order='F')
+        else:
+            maps = maps_in
+            
+        fastSHT.alm2t( alms, maps)
+        if(maps_in is None):
+            return maps
+        else:
+            return 0
 
+    def qu2eb(self, Q, U, almEs_in=None, almBs_in=None, method='old'):
+        if(almEs_in is None or almBs_in is None):
+            try:
+                almEs = numba.cuda.pinned_array((self.nsim, self.lmax+1, self.lmax+1), dtype=np.double, strides=None, order='F')
+                almBs = numba.cuda.pinned_array((self.nsim, self.lmax+1, self.lmax+1), dtype=np.double, strides=None, order='F')
+            except:
+                almEs = np.ones((self.nsim, self.lmax+1, self.lmax+1), order='F')
+                almBs = np.ones((self.nsim, self.lmax+1, self.lmax+1), order='F')
+        else:
+            almEs = almEs_in
+            almBs = almBs_in
+            
         if(self.niter == 0):
             fastSHT.qu2eb(Q, U, almEs, almBs)
-        else:
+        elif(method == 'old'):
             fastSHT.qu2eb_iter_old(Q, U, almEs, almBs, self.niter, 0)
-                
-        return (almEs, almBs)
 
+        if(almEs_in is None or almBs_in is None):            
+            return (almEs, almBs)
+        else:
+            return 0
+
+    def qu2e(self, Q, U, almEs_in=None):
+        if(almEs_in is None):
+            try:
+                almEs = numba.cuda.pinned_array((self.nsim, self.lmax+1, self.lmax+1), dtype=np.double, strides=None, order='F')
+            except:
+                almEs = np.ones((self.nsim, self.lmax+1, self.lmax+1), order='F')
+        else:
+            almEs = almEs_in
+
+        fastSHT.qu2e(Q, U, almEs)
+        
+        if(almEs_in is None):            
+            return almEs
+        else:
+            return 0
+
+    def qu2b(self, Q, U, almBs_in=None):
+        if(almBs_in is None):
+            try:
+                almBs = numba.cuda.pinned_array((self.nsim, self.lmax+1, self.lmax+1), dtype=np.double, strides=None, order='F')
+            except:
+                almBs = np.ones((self.nsim, self.lmax+1, self.lmax+1), order='F')
+        else:
+            almBs = almBs_in
+            
+        fastSHT.qu2b(Q, U, almBs)
+
+        if(almBs_in is None):            
+            return almBs
+        else:
+            return 0
+
+        
     def eb2qu(self, almEs, almBs):
         try:
             Q = numba.cuda.pinned_array((self.npix, self.nsim), dtype=np.double, strides=None, order='F')

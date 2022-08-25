@@ -939,34 +939,57 @@ end
 
 
 
-! SUBROUTINE QU2E( Q, U, almE)
-!     !DIR$ ATTRIBUTES FORCEINLINE :: set_locations
-!     use sht_data_module, only: nside, npix, lmax, nsim, nring, plm1, plm2, buff1, buff2
-!     implicit none
-!     ! Main input/output, alm is saved as real-value square matrix with the new scheme (see fig.1)
-!     real(8), intent(in)     :: Q(0:npix-1, 1:nsim)
-!     real(8), intent(in)     :: U(0:npix-1, 1:nsim)
-!     real(8), intent(out)    :: almE(1:nsim, 0:lmax, 0:lmax)
+SUBROUTINE QU2E( Q, U, almE)
+    use sht_data_module
+#ifdef GPU
+    use cublas_v2
+    use cudafor
+#endif
+    implicit none
 
-!     integer(4) :: m
+    ! Main input/output, alm is saved as real-value square matrix with the new scheme (see fig.1)
+    real(8), intent(in)     :: Q(0:npix-1, 1:nsim)
+    real(8), intent(in)     :: U(0:npix-1, 1:nsim)
+    real(8), intent(out)    :: almE(1:nsim, 0:lmax, 0:lmax)
 
-!     call map2fft(Q, buff1)
-!     call map2fft(U, buff2)
+    integer(4) :: m
 
-!     do m=0, lmax
-!         call set_locations(m)
+#ifdef GPU
+    integer  :: stat
+#endif
+
+#ifdef GPU
+    call map2fft(Q, buff1, d_buff1)
+    call map2fft(U, buff1, d_buff2)    
+#else
+    call map2fft(Q, buff1)
+    call map2fft(U, buff2)
+#endif
+
+    do m=0, lmax
+        call set_locations(m)
         
-!         call get_plm_recursive(1, m)
+        call get_plm_recursive(1, m)
 
-!         call fft2mat_fast(buff1, m)
-!         call mat2alm( almE, plm1, m, 1, 0.d0)
+#ifdef GPU
+        call fft2mat_fast(d_buff1, m)
+        call mat2alm( cu_streams(m), d_alm, plm1, m, 1, 0.d0)
 
-!         call fft2mat_fast(buff2, m)
-!         call mat2alm( almE, plm2, m, 2, 1.d0)
-!     enddo
+        call fft2mat_fast(d_buff2, m)
+        call mat2alm( cu_streams(m), d_alm, plm2, m, 2, 1.d0)        
+#else
+        call fft2mat_fast(buff1, m)
+        call mat2alm( almE, plm1, m, 1, 0.d0)
 
-!     return 
-! end
+        call fft2mat_fast(buff2, m)
+        call mat2alm( almE, plm2, m, 2, 1.d0)
+#endif
+    enddo
+#ifdef GPU
+    almE = d_alm
+#endif
+    return 
+end
 
 
 
@@ -977,34 +1000,55 @@ end
 
 
 
-! SUBROUTINE QU2B( Q, U, almB)
-!     !DIR$ ATTRIBUTES FORCEINLINE :: set_locations
-!     use sht_data_module, only: nside, npix, lmax, nsim, nring, plm1, plm2, buff1, buff2
-!     implicit none
-!     ! Main input/output, alm is saved as real-value square matrix with the new scheme (see fig.1)
-!     real(8), intent(in)     :: Q(0:npix-1, 1:nsim)
-!     real(8), intent(in)     :: U(0:npix-1, 1:nsim)
-!     real(8), intent(out)    :: almB(1:nsim, 0:lmax, 0:lmax)
+SUBROUTINE QU2B( Q, U, almB)
+    use sht_data_module
+#ifdef GPU
+    use cublas_v2
+    use cudafor
+#endif
+    implicit none
 
-!     integer(4) :: m
+    ! Main input/output, alm is saved as real-value square matrix with the new scheme (see fig.1)
+    real(8), intent(in)     :: Q(0:npix-1, 1:nsim)
+    real(8), intent(in)     :: U(0:npix-1, 1:nsim)
+    real(8), intent(out)    :: almB(1:nsim, 0:lmax, 0:lmax)
 
-!     call map2fft(Q, buff1)
-!     call map2fft(U, buff2)
+    integer(4) :: m
+#ifdef GPU
+    integer  :: stat
+#endif
 
-!     do m=0, lmax
-!         call set_locations(m)
+#ifdef GPU
+    call map2fft(Q, buff1, d_buff1)
+    call map2fft(U, buff1, d_buff2)    
+#else
+    call map2fft(Q, buff1)
+    call map2fft(U, buff2)
+#endif
+    do m=0, lmax
+        call set_locations(m)
 
-!         call get_plm_recursive(1, m)
+        call get_plm_recursive(1, m)
+#ifdef GPU
+        call fft2mat_fast(d_buff2, m)
+        call mat2alm( cu_streams(m), d_alm, plm1, m, 1, 0.d0)
 
-!         call fft2mat_fast(buff2, m)
-!         call mat2alm( almB, plm1, m, 1, 0.d0)
+        call fft2mat_fast(d_buff1, m)
+        call mat2alm( cu_streams(m), d_alm, plm2, m, 3, 1.d0)        
+#else
+        call fft2mat_fast(buff2, m)
+        call mat2alm( almB, plm1, m, 1, 0.d0)
 
-!         call fft2mat_fast(buff1, m)
-!         call mat2alm( almB, plm2, m, 3, 1.d0)
-!     enddo
+        call fft2mat_fast(buff1, m)
+        call mat2alm( almB, plm2, m, 3, 1.d0)
+#endif
+    enddo
+#ifdef GPU
+    almB = d_alm
+#endif
 
-!     return 
-! end
+    return 
+end
 
 
 
