@@ -27,7 +27,7 @@ def test_t2alm(seed=23333):
 
     sht = SHT.SHT(nside, lmax, nsim, niter)
 
-    alms = sht.t2alm_old(T)
+    alms = sht.t2alm(T)
 
     alms1_hp = sht.convert_alm_healpy(alms)
     alms1_hp = (alms1_hp[0,:,:] + 1j * alms1_hp[1,:,:])

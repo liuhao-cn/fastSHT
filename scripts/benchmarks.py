@@ -74,7 +74,7 @@ def test_t2alm(seed=23333):
 
     start = time.time()
     for i in range(nrep):
-        sht.t2alm_old(maps, alms)
+        sht.t2alm(maps, alms)
     end = time.time() - start
     print('Calculation time cost for fastSHT is ' + str(end / nrep))
 
