@@ -149,7 +149,10 @@ If only Intel oneAPI is installed, use
 
 First go to folder ``scripts'', and then:
 
-A python file that demonstrates the basic interfaces: `demo.py`.
+A python file that demonstrates the basic interfaces:
+```
+python demo.py
+```
 
 A comprehensive test and accuracy comparisons with Healpy (may take a long time to run):
 ```
