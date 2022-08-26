@@ -149,6 +149,8 @@ If only Intel oneAPI is installed, use
 
 First go to folder ``scripts'', and then:
 
+A python file that demonstrates the basic interfaces: `demo.py`.
+
 A comprehensive test and accuracy comparisons with Healpy (may take a long time to run):
 ```
 python test_comprehensive.py
@@ -171,8 +173,6 @@ or specify the parameters in order of ``nside nsim n_proc niter comparison_flag'
 ```
 python test_fixEB.py 128 200 8 3 true
 ```
-
-A python file that demonstrates the basic interfaces: `scripts/demo.py`.
 
 # 4. FAQs
 
