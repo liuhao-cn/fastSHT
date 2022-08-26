@@ -26,7 +26,7 @@ import matplotlib.pyplot as plt
 
 # Set main parameters
 
-nside = 128        # nside
+nside = 64        # nside
 lmax = 3*nside-1   # lmax
 nsim = 100         # number of maps
 niter = 3          # number of iterations
