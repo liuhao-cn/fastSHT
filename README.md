@@ -27,6 +27,8 @@ Nvidia HPC SDK (22.3)
 
 Dependencies and system PATH should be configured properly. 
 
+One can choose either 2.1.1 (with docker) or 2.1.2 (no docker), but there is no need to do both.
+
 ### 2.1.1. Environment preparation with docker (much easier)
 
 See https://docs.docker.com/engine/install/ for a docker installation instruction
@@ -79,7 +81,7 @@ sudo apt-get install cmake
 
 Choose one way from 2.1.2.2.a and 2.1.2.2.b to Install Intel oneapi. The latter is a partial installation that uses less disk space.
 
-#### 2.1.2.2.a. Install oneapi, way 1: via ``sudo apt install``
+#### 2.1.2.2.a. Install oneapi, way 1: via sudo apt install
 
 ```
 wget -O- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB \ | gpg --dearmor | sudo tee /usr/share/keyrings/oneapi-archive-keyring.gpg > /dev/null
