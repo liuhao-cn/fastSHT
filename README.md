@@ -92,6 +92,22 @@ pip3 install healpy
 pip3 install f90wrap
 ```
 
+If users do want to save some disk spaces, they can optionally partially install intel one API following the instruction below 
+```
+# Download the Intel oneapi installation packages
+wget https://registrationcenter-download.intel.com/akdlm/irc_nas/18673/l_BaseKit_p_2022.2.0.262_offline.sh
+wget https://registrationcenter-download.intel.com/akdlm/irc_nas/18679/l_HPCKit_p_2022.2.0.191_offline.sh
+
+# If python 3 is already installed, use the following command to install the basekit (default):
+sudo sh l_BaseKit_p_2022.2.0.262_offline.sh -a --silent --eula accept --components intel.oneapi.lin.dpcpp_dbg:intel.oneapi.lin.dpl:intel.oneapi.lin.dpcpp-cpp-compiler:intel.oneapi.lin.mkl.devel:intel.oneapi.lin.tbb.devel
+
+# If python is not installed, use this command to include Intel python in installation
+# sudo sh l_BaseKit_p_2022.2.0.262_offline.sh -a --silent --eula accept --components intel.oneapi.lin.dpcpp_dbg:intel.oneapi.lin.dpl:intel.oneapi.lin.dpcpp-cpp-compiler:intel.oneapi.lin.mkl.devel:intel.oneapi.lin.tbb.devel:intel.oneapi.lin.python3
+
+# use the following command to install the HPC kit
+sudo sh l_HPCKit_p_2022.2.0.191_offline.sh -a --silent --eula accept --components intel.oneapi.lin.mpi.devel:intel.oneapi.lin.ifort-compiler:intel.oneapi.lin.dpcpp-cpp-compiler-pro
+```
+
 If no GPU is going to be employed, one can stop here and compile the fastSHT with CPU only using the script `./compile_ifort.sh`. 
 If some MKL linking errors are encounted, see FAQs for solutions.
 
