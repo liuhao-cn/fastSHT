@@ -110,9 +110,13 @@ sudo sh l_BaseKit_p_2022.2.0.262_offline.sh -a --silent --eula accept --componen
 # use the following command to install the HPC kit
 sudo sh l_HPCKit_p_2022.2.0.191_offline.sh -a --silent --eula accept --components intel.oneapi.lin.mpi.devel:intel.oneapi.lin.ifort-compiler:intel.oneapi.lin.dpcpp-cpp-compiler-pro
 
+sed -i '1 i\export LD_PRELOAD=:$LD_PRELOAD:/opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_core.so:/opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_intel_lp64.so:/opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_intel_thread.so:/opt/intel/oneapi/compiler/latest/linux/compiler/lib/intel64_lin/libiomp5.so' ~/.bashrc
+
 sed -i '1 i\source /opt/intel/oneapi/setvars.sh > /dev/null' ~/.bashrc
+
 source ~/.bashrc
 ```
+where `/opt/intel` is for the case of installing oneapi with root. If oneapi is installed in a user account, then `/opt/intel` can be `/home/user_name/intel/` or `~/intel`
 
 #### 2.1.2.3. Install healpy and f90wrap
 
