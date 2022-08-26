@@ -172,7 +172,7 @@ or specify the parameters in order of ``nside nsim n_proc niter comparison_flag'
 python test_fixEB.py 128 200 8 3 true
 ```
 
-Notebook that demonstrates the basic interfaces is in  `scripts/demo.ipynb`.
+A python file that demonstrates the basic interfaces: `scripts/demo.py`.
 
 # 4. FAQs
 
