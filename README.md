@@ -160,13 +160,13 @@ If only Intel oneAPI is installed, use
 
 ## 2.3 Check the preloads
 
-On some systems one needs to define the preload path; however, on some other systems this should be avoided. Therefore, one should first run the following script and then try `3. Examples and Testing`. If that causes a problem, then one should restart bash (e.g., turn off the terminal and then turn it on again) to erase the change, and then continue to `3. Examples and Testing`.
+On some systems one needs to define the preload path; however, on some other systems this should be avoided. Therefore, one should try adding the following preload paths only if one encounters linking errors while importing the SHT python module (mostly these errors regard the openmp libraries). 
 ```
 export LD_PRELOAD=:$LD_PRELOAD:/opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_core.so:/opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_intel_lp64.so:/opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_intel_thread.so:/opt/intel/oneapi/compiler/latest/linux/compiler/lib/intel64_lin/libiomp5.so
 ```
 Here `/opt/intel` is for the case of installing oneapi with root. If oneapi is installed with a user account, then `/opt/intel` should be `/home/user_name/intel/` or `~/intel`.
 
-If, by the above test, this script is found to be necessary, then one should consider adding it to ~/.bashrc for future convenience.
+If, by the above test, this script is found to be necessary, then one should consider adding it to ~/.bashrc for future convenience. You are very much welcome to open an issue if you have experienced other complilation diffuculties. 
 
 
 # 3. Examples and Testing
@@ -197,7 +197,7 @@ python test_fixEB.py 128 200 8 3 true # with parameters in order of nside nsim n
 
 # 4. FAQs
 
-## 4.1. Linking errors associated with Intel MKL (for installation without docker)
+## 4.1. Linking errors associated with Intel MKL when import the SHT module (for installation without docker)
 
 Try pre-load some MKL libraries by
 
