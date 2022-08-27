@@ -50,7 +50,7 @@ sudo apt-get update
 sudo apt-get install nvidia-container-runtime
 sudo systemctl restart docker
 ```
-Finally, run the docker image with the following command, which will map the /home to docker, so if one clone the fastSHT repository to his/her home directory, it will be automatically available in docker.
+Finally, run the docker image with the following command, which also makes /home available in docker, so if one clone the fastSHT repository to the home directory, it will be available in docker.
 ```
 sudo docker run -it -v /home:/home --gpus all rectaflex/intel_nvidia_sdk
 ```
