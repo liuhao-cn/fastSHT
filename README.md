@@ -112,13 +112,10 @@ sudo sh l_BaseKit_p_2022.2.0.262_offline.sh -a --silent --eula accept --componen
 # use the following command to install the HPC kit
 sudo sh l_HPCKit_p_2022.2.0.191_offline.sh -a --silent --eula accept --components intel.oneapi.lin.mpi.devel:intel.oneapi.lin.ifort-compiler:intel.oneapi.lin.dpcpp-cpp-compiler-pro
 
-sed -i '1 i\export LD_PRELOAD=:$LD_PRELOAD:/opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_core.so:/opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_intel_lp64.so:/opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_intel_thread.so:/opt/intel/oneapi/compiler/latest/linux/compiler/lib/intel64_lin/libiomp5.so' ~/.bashrc
-
 sed -i '1 i\source /opt/intel/oneapi/setvars.sh > /dev/null' ~/.bashrc
 
 source ~/.bashrc
 ```
-where `/opt/intel` is for the case of installing oneapi with root. If oneapi is installed in a user account, then `/opt/intel` can be `/home/user_name/intel/` or `~/intel`
 
 #### 2.1.2.3. Install healpy and f90wrap
 
@@ -160,6 +157,17 @@ If only Intel oneAPI is installed, use
 ```
 ./compile_ifort.sh # for general CPU version (see FAQs if linking errors are encountered)
 ```
+
+## 2.3 Check the preloads
+
+On some systems one needs to define the preload path; however, on some other systems this should be avoided. Therefore, one should first run the following script and then try `3. Examples and Testing`. If that causes a problem, then one should restart bash (e.g., turn off the terminal and then turn it on again) to erase the change, and then continue to `3. Examples and Testing`.
+```
+export LD_PRELOAD=:$LD_PRELOAD:/opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_core.so:/opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_intel_lp64.so:/opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_intel_thread.so:/opt/intel/oneapi/compiler/latest/linux/compiler/lib/intel64_lin/libiomp5.so
+```
+Here `/opt/intel` is for the case of installing oneapi with root. If oneapi is installed with a user account, then `/opt/intel` should be `/home/user_name/intel/` or `~/intel`.
+
+If, by the above test, this script is found to be necessary, then one should consider adding it to ~/.bashrc for future convenience.
+
 
 # 3. Examples and Testing
 
