@@ -186,7 +186,7 @@ python test_comprehensive.py
 A benchmark code:
 ```
 python benchmarks.py  # with default parameters
-python benchmarks.py 128 1000 8 3 false # with parameters in order of nside nsim n_proc niter comparison_flag
+python benchmarks.py 128 1000 8 3 t2alm false # with parameters in order of nside nsim n_proc niter type comparison_flag
 ```
 
 A test-and-benchmark code for the fix-EB job:
