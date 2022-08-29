@@ -11,6 +11,7 @@ nsim = 2000
 n_proc = 8
 niter = 3
 compare = False
+test_type = 't2alm'
 
 # the command line input will overwrite the defaults
 if len(sys.argv)>1:
@@ -23,11 +24,21 @@ if len(sys.argv)>4:
     niter = int(sys.argv[4])
 if len(sys.argv)>5:
     compare = sys.argv[5].lower() == "true"
+if len(sys.argv)>6:
+    test_type = sys.argv[6].lower()
+
+if test_type=='t2alm':
+    tstr = 't2alm'
+elif test_type=='qu2eb':
+    tstr = 'qu2eb'
+else:
+    tstr = 'fix-eb'
+
 
 print(" ")
 print("Working with the following parameters:")
-print("Nside = %i, Nsim = %i, n_proc = %i, Niter = %i, comparison with HEALPix = %s" 
-    %(nside, nsim, n_proc, niter, compare))
+print("Nside = %i, Nsim = %i, n_proc = %i, Niter = %i, comparison with HEALPix = %s, test type=%s" 
+    %(nside, nsim, n_proc, niter, compare, tstr))
 print("Note: this test will only show the time cost. For accuracies use test_comprehensive.py")
 print(" ")
 
@@ -210,6 +221,9 @@ def test_qu2eb(seed=23333):
     print('Time cost for healpy is ' + str(time.time() - start))
     
 
-test_t2alm()
-# test_qu2eb()
-# test_fix_EB()
+if test_type=='t2alm':
+    test_t2alm()
+elif test_type=='qu2eb':
+    test_qu2eb()
+else:
+    test_fix_EB()
