@@ -23,11 +23,13 @@ Nvidia HPC SDK (22.3)
 # 2. Installation
 
 
-## 2.1 Before compilation 
+## 2.1. Before compilation 
 
 Dependencies and system PATH should be configured properly. 
 
-### 2.1.1 Environment preparation with docker (much easier)
+One can choose either 2.1.1 (with docker) or 2.1.2 (no docker), but there is no need to do both.
+
+### 2.1.1. Environment preparation with docker (much easier)
 
 See https://docs.docker.com/engine/install/ for a docker installation instruction
 
@@ -48,58 +50,85 @@ sudo apt-get update
 sudo apt-get install nvidia-container-runtime
 sudo systemctl restart docker
 ```
-Finally, run the docker image with
+Finally, run the docker image with the following command, which also makes /home available in docker, so if one clone the fastSHT repository to the home directory, it will be available in docker.
 ```
 sudo docker run -it -v /home:/home --gpus all rectaflex/intel_nvidia_sdk
 ```
 
-### 2.1.2 Environment preparation for ubuntu (no docker)
+### 2.1.2. Environment preparation for ubuntu (no docker)
 
 For non-docker users, we give a sample script for building a compilation environment for fastSHT based on an ubuntu-20.04.
+
+#### 2.1.2.1. Install recent cmake
 
 ```
 sudo apt update
 
 sudo apt -y install pkg-config sudo build-essential
 
-# installing recent cmake
 sudo apt-get install apt-transport-https ca-certificates gnupg software-properties-common wget
 
 wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | sudo apt-key add -
 
 sudo apt-add-repository 'deb https://apt.kitware.com/ubuntu/ bionic main'
+
 sudo apt-get update
 
 sudo apt-get install cmake
+```
 
-# Installing intel-one-api
+#### 2.1.2.2. Install Intel oneapi
 
-wget -O- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB \
-| gpg --dearmor | sudo tee /usr/share/keyrings/oneapi-archive-keyring.gpg > /dev/null
+Choose one way from 2.1.2.2.a and 2.1.2.2.b to Install Intel oneapi. The latter is a partial installation that uses less disk space.
+
+#### 2.1.2.2.a. Install oneapi, way 1: via sudo apt install
+
+```
+wget -O- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB \ | gpg --dearmor | sudo tee /usr/share/keyrings/oneapi-archive-keyring.gpg > /dev/null
 
 echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt.repos.intel.com/oneapi all main" | sudo tee /etc/apt/sources.list.d/oneAPI.list
 
 sudo apt-get update
 
-sudo apt install intel-basekit
-sudo apt install intel-hpckit
+sudo apt install intel-basekit intel-hpckit
 
 sed -i '1 i\source /opt/intel/oneapi/setvars.sh > /dev/null' ~/.bashrc
 source ~/.bashrc
+```
 
-# installing healpy and f90wrap
-pip3 install healpy
-pip3 install f90wrap
+#### 2.1.2.2.b. Install oneapi, way 2: a partial installation that saves disk space
+
+```
+# Download the Intel oneapi installation packages
+wget https://registrationcenter-download.intel.com/akdlm/irc_nas/18673/l_BaseKit_p_2022.2.0.262_offline.sh
+wget https://registrationcenter-download.intel.com/akdlm/irc_nas/18679/l_HPCKit_p_2022.2.0.191_offline.sh
+
+# If python 3 is already installed, use the following command to install the basekit (default):
+sudo sh l_BaseKit_p_2022.2.0.262_offline.sh -a --silent --eula accept --components intel.oneapi.lin.dpcpp_dbg:intel.oneapi.lin.dpl:intel.oneapi.lin.dpcpp-cpp-compiler:intel.oneapi.lin.mkl.devel:intel.oneapi.lin.tbb.devel
+
+# If python is not installed, use this command to include Intel python in installation
+# sudo sh l_BaseKit_p_2022.2.0.262_offline.sh -a --silent --eula accept --components intel.oneapi.lin.dpcpp_dbg:intel.oneapi.lin.dpl:intel.oneapi.lin.dpcpp-cpp-compiler:intel.oneapi.lin.mkl.devel:intel.oneapi.lin.tbb.devel:intel.oneapi.lin.python3
+
+# use the following command to install the HPC kit
+sudo sh l_HPCKit_p_2022.2.0.191_offline.sh -a --silent --eula accept --components intel.oneapi.lin.mpi.devel:intel.oneapi.lin.ifort-compiler:intel.oneapi.lin.dpcpp-cpp-compiler-pro
+
+sed -i '1 i\source /opt/intel/oneapi/setvars.sh > /dev/null' ~/.bashrc
+
+source ~/.bashrc
+```
+
+#### 2.1.2.3. Install healpy and f90wrap
+
+```
+pip3 install healpy f90wrap
 ```
 
 If no GPU is going to be employed, one can stop here and compile the fastSHT with CPU only using the script `./compile_ifort.sh`. 
 If some MKL linking errors are encounted, see FAQs for solutions.
 
-To continue with GPU support:
+#### 2.1.2.4. Continue with GPU support and install the nvidia hpc sdk:
 
 ```
-# installing nvidia hpc sdk
-
 echo 'deb [trusted=yes] https://developer.download.nvidia.com/hpc-sdk/ubuntu/amd64 /' | sudo tee /etc/apt/sources.list.d/nvhpc.list
 
 sudo apt-get update -y
@@ -110,16 +139,16 @@ sed -i '1 i\export PATH="/opt/nvidia/hpc_sdk/Linux_x86_64/22.3/compilers/bin/:$P
 
 source ~/.bashrc
 
-
 ```
 
-## 2.2 Compilation
+## 2.2. Compilation
 
 If BOTH Intel oneAPI and Nvidia SDK are installed, use
 
 ```
 ./compile.sh # for the CPU version
 ```
+or
 ```
 ./compile.sh -DGPU=on # for the GPU version
 ```
@@ -129,38 +158,46 @@ If only Intel oneAPI is installed, use
 ./compile_ifort.sh # for general CPU version (see FAQs if linking errors are encountered)
 ```
 
+## 2.3 Check the preloads
+
+On some systems one needs to define the preload path; however, on some other systems this should be avoided. Therefore, one should try adding the following preload paths only if one encounters linking errors while importing the SHT python module (mostly these errors regard the openmp libraries). 
+```
+export LD_PRELOAD=:$LD_PRELOAD:/opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_core.so:/opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_intel_lp64.so:/opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_intel_thread.so:/opt/intel/oneapi/compiler/latest/linux/compiler/lib/intel64_lin/libiomp5.so
+```
+Here `/opt/intel` is for the case of installing oneapi with root. If oneapi is installed with a user account, then `/opt/intel` should be `/home/user_name/intel/` or `~/intel`.
+
+If, by the above test, this script is found to be necessary, then one should consider adding it to ~/.bashrc for future convenience. You are very much welcome to open an issue if you have experienced other complilation diffuculties. 
+
+
 # 3. Examples and Testing
 
 First go to folder ``scripts'', and then:
+
+A python file that demonstrates the basic interfaces:
+```
+python demo.py
+```
 
 A comprehensive test and accuracy comparisons with Healpy (may take a long time to run):
 ```
 python test_comprehensive.py
 ```
 
-A benchmark code with default parameters:
+A benchmark code:
 ```
-python benchmarks.py
-```
-or specify the parameters in order of ``nside nsim n_proc niter comparison_flag'':
-```
-python benchmarks.py 128 1000 8 3 false
+python benchmarks.py  # with default parameters
+python benchmarks.py 128 1000 8 3 false # with parameters in order of nside nsim n_proc niter comparison_flag
 ```
 
-A test-and-benchmark code for the fix-EB job with default parameters:
+A test-and-benchmark code for the fix-EB job:
 ```
-python test_fixEB.py
+python test_fixEB.py  # with default parameters
+python test_fixEB.py 128 200 8 3 true # with parameters in order of nside nsim n_proc niter comparison_flag 
 ```
-or specify the parameters in order of ``nside nsim n_proc niter comparison_flag'':
-```
-python test_fixEB.py 128 200 8 3 true
-```
-
-Notebook that demonstrates the basic interfaces is in  `scripts/demo.ipynb`.
 
 # 4. FAQs
 
-## 4.1 Linking errors associated with Intel MKL (for installation without docker)
+## 4.1. Linking errors associated with Intel MKL when import the SHT module (for installation without docker)
 
 Try pre-load some MKL libraries by
 
@@ -168,7 +205,7 @@ Try pre-load some MKL libraries by
 
 where `/opt/intel` is for the case of installing oneapi with root. If oneapi is installed in a user account, then `/opt/intel` can be `/home/user_name/intel/` or `~/intel`
 
-## 4.2 A known Issue for fastSHT (CPU only) without docker:
+## 4.2. A known Issue for fastSHT (CPU only) without docker:
 
 If intel oneapi is installed with a user account, then one may need to run the following command before compiling:
 ```

@@ -177,4 +177,7 @@ class SHT:
     def convert_alm_healpy(self, alms):
         alms_hp = np.empty((2, int((self.lmax+1) * (self.lmax+2) / 2) , self.nsim), order='F')
         fastSHT.convert_alm_healpy1(alms, alms_hp, self.nsim, self.lmax)
+
+        alms_hp = alms_hp[0,:,:] + 1j * alms_hp[1,:,:]
+
         return alms_hp

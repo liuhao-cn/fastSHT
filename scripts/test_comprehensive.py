@@ -29,19 +29,22 @@ def test_t2alm(seed=23333):
 
     alms = sht.t2alm(T)
 
-    alms1_hp = sht.convert_alm_healpy(alms)
-    alms1_hp = (alms1_hp[0,:,:] + 1j * alms1_hp[1,:,:])
+    alms_hp1 = sht.convert_alm_healpy(alms)
     
-    alms2_hp = np.array([hp.map2alm(T[:,i], lmax=lmax, iter=niter) for i in range(nsim)])
+    alms_hp2 = alms_hp1*0
+    for i in range(nsim):
+        alms_hp2[:,i] = hp.map2alm(T[:,i], lmax=lmax, iter=niter)
     
-    cl1 = np.array([hp.alm2cl(alms1_hp[:,i]) for i in range(nsim)])
-    cl2 = np.array([hp.alm2cl(alms2_hp[i,:]) for i in range(nsim)])
+    cl1 = np.array([hp.alm2cl(alms_hp1[:,i]) for i in range(nsim)])
+    cl2 = np.array([hp.alm2cl(alms_hp2[:,i]) for i in range(nsim)])
     
     max_errTT = (np.abs(cl2 - cl1) / cl2.mean()).max()
 
     maps1 = sht.alm2t(alms)
-    maps2 = np.array([hp.alm2map(alms1_hp[:,i], nside, pol=False) for i in range(nsim)])
-    max_errT = (np.abs(maps1-maps2.transpose())/np.std(maps2)).max()
+    maps2 = maps1*0
+    for i in range(nsim):
+        maps2[:,i] = hp.alm2map(alms_hp1[:,i], nside, pol=False)
+    max_errT = (np.abs(maps1-maps2)/np.std(maps2)).max()
 
     return max_errT, max_errTT
 
@@ -54,34 +57,51 @@ def test_qu2eb(seed=23333):
     
     sht = SHT.SHT(nside, lmax, nsim, niter, pol=True)
     
-    start = time.time()
-    almEs, almBs = sht.qu2eb(Q, U)
+    almEs_0, almBs_0 = sht.qu2e(Q, U), sht.qu2b(Q, U)
+    almEs_1, almBs_1 = sht.qu2eb(Q, U)
 
-    almEs_hp = sht.convert_alm_healpy(almEs)
-    almEs_hp = (almEs_hp[0,:,:] + 1j * almEs_hp[1,:,:])
-    almBs_hp = sht.convert_alm_healpy(almBs)
-    almBs_hp = (almBs_hp[0,:,:] + 1j * almBs_hp[1,:,:])
+    almEs_hp0 = sht.convert_alm_healpy(almEs_0)
+    almBs_hp0 = sht.convert_alm_healpy(almBs_0)
+    almEs_hp1 = sht.convert_alm_healpy(almEs_1)
+    almBs_hp1 = sht.convert_alm_healpy(almBs_1)
     
-    maps = np.asfortranarray( [T, Q, U ] )
+    maps = np.asfortranarray( [T, Q, U] )
     
-    start = time.time()
-    alms2_hp = np.array([hp.map2alm(maps[:,:,i], lmax=lmax, iter=niter) for i in range(nsim)])
+    # note: qu2e and qu2b has no iteration
+    alms_hp2 = np.array([hp.map2alm(maps[:,:,i], lmax=lmax, iter=niter) for i in range(nsim)])
+    alms_hp3 = np.array([hp.map2alm(maps[:,:,i], lmax=lmax, iter=0) for i in range(nsim)])
+    almEs_hp2 = alms_hp2[:,1,:].transpose()
+    almBs_hp2 = alms_hp2[:,2,:].transpose()
+    almEs_hp3 = alms_hp3[:,1,:].transpose()
+    almBs_hp3 = alms_hp3[:,2,:].transpose()
     
-    cl = np.array([hp.alm2cl(almEs_hp[:,i]) for i in range(nsim)])
-    cl2 = np.array([hp.alm2cl(alms2_hp[i, 1, :]) for i in range(nsim)])
-    max_errEE = (np.abs(cl2 - cl) / cl.mean()).max()
+    cl0 = np.array([hp.alm2cl(almEs_hp0[:,i]) for i in range(nsim)])
+    cl1 = np.array([hp.alm2cl(almEs_hp1[:,i]) for i in range(nsim)])
+    cl2 = np.array([hp.alm2cl(almEs_hp2[:,i]) for i in range(nsim)])
+    cl3 = np.array([hp.alm2cl(almEs_hp3[:,i]) for i in range(nsim)])
+    err0 = (np.abs(cl3 - cl0) / cl2.mean()).max()
+    err1 = (np.abs(cl2 - cl1) / cl2.mean()).max()
+    max_errEE = max(err0, err1)
     
-    cl = np.array([hp.alm2cl(almBs_hp[:,i]) for i in range(nsim)])
-    cl2 = np.array([hp.alm2cl(alms2_hp[i, 2, :]) for i in range(nsim)])
-    max_errBB = (np.abs(cl2 - cl) / cl.mean()).max()
+    
+    cl0 = np.array([hp.alm2cl(almBs_hp0[:,i]) for i in range(nsim)])
+    cl1 = np.array([hp.alm2cl(almBs_hp1[:,i]) for i in range(nsim)])
+    cl2 = np.array([hp.alm2cl(almBs_hp2[:,i]) for i in range(nsim)])
+    cl3 = np.array([hp.alm2cl(almBs_hp3[:,i]) for i in range(nsim)])
+    err0 = (np.abs(cl3 - cl0) / cl2.mean()).max()
+    err1 = (np.abs(cl2 - cl1) / cl2.mean()).max()
+    max_errBB = max(err0, err1)
 
-    q1, u1 = sht.eb2qu(almEs, almBs)
-    maps2 = np.array([hp.alm2map(alms2_hp[i,:,:], nside, pol=True) for i in range(nsim)])
-    q2 = maps2[:,1,:].transpose()
-    u2 = maps2[:,2,:].transpose()
+    Q1, U1 = sht.eb2qu(almEs_1, almBs_1)
+    maps2 = np.array([hp.alm2map(alms_hp2[i,:,:], nside, pol=True) for i in range(nsim)])
+    Q2 = maps2[:,1,:].transpose()
+    U2 = maps2[:,2,:].transpose()
 
-    max_errQ = (np.abs(q2 - q1)/q1.std()).max()
-    max_errU = (np.abs(u2 - u1)/u1.std()).max()
+    max_errQ = (np.abs(Q2 - Q1)/Q1.std()).max()
+    max_errU = (np.abs(U2 - U1)/U1.std()).max()
+
+    almEs_tmp = sht.qu2e(Q, U)
+    almBs_tmp = sht.qu2b(Q, U)
 
     return max_errQ, max_errU, max_errEE, max_errBB
 

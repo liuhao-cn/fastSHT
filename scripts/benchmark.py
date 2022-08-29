@@ -83,7 +83,6 @@ def test_t2alm(seed=23333):
         return
     
     alms_hp = sht.convert_alm_healpy(alms); del alms
-    alms_hp = (alms_hp[0,:,:] + 1j * alms_hp[1,:,:])
     alm_shape = alms_hp.shape[0]
     del alms_hp
 
@@ -202,9 +201,7 @@ def test_qu2eb(seed=23333):
         return
 
     almEs_hp = sht.convert_alm_healpy(almEs)
-    almEs_hp = (almEs_hp[0,:,:] + 1j * almEs_hp[1,:,:])
     almBs_hp = sht.convert_alm_healpy(almBs)
-    almBs_hp = (almBs_hp[0,:,:] + 1j * almBs_hp[1,:,:])
     
     maps = np.asfortranarray( [T, Q, U ])
     
