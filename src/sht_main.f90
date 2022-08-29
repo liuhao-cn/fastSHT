@@ -907,7 +907,7 @@ SUBROUTINE fix_eb( Q, U, mask, Bmap, almB, Btpl, vid, niter, nv, flag)
 
 #ifdef GPU
     call fft2map( d_buff1, buff1, buff3) ! buff3 = B-map with leakage
-    call fft2map( d_buff2, buff2, Btpl)  ! buff4 = template of leakage
+    call fft2map( d_buff2, buff1, Btpl)  ! buff4 = template of leakage
 #else
     call fft2map( buff1, buff3) ! buff3 = B-map with leakage
     call fft2map( buff2, Btpl)  ! buff4 = template of leakage
@@ -1126,7 +1126,7 @@ SUBROUTINE EB2QU( almE, almB, Q, U )
 
 #ifdef GPU
       call fft2map( d_buff1, buff1, Q )
-      call fft2map( d_buff2, buff2, U )     
+      call fft2map( d_buff2, buff1, U )     
 #else
       call fft2map( buff1, Q )
       call fft2map( buff2, U )
@@ -1204,7 +1204,7 @@ SUBROUTINE E2QU( almE, Q, U )
 
 #ifdef GPU
     call fft2map( d_buff1, buff1, Q )
-    call fft2map( d_buff2, buff2, U )
+    call fft2map( d_buff2, buff1, U )
 #else
     call fft2map( buff1, Q )
     call fft2map( buff2, U )
