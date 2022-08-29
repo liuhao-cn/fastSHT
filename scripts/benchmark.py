@@ -10,8 +10,8 @@ nside = 64
 nsim = 2000
 n_proc = 8
 niter = 3
-compare = False
 test_type = 't2alm'
+compare = False
 
 # the command line input will overwrite the defaults
 if len(sys.argv)>1:
@@ -23,9 +23,9 @@ if len(sys.argv)>3:
 if len(sys.argv)>4:
     niter = int(sys.argv[4])
 if len(sys.argv)>5:
-    compare = sys.argv[5].lower() == "true"
+    test_type = sys.argv[5].lower()
 if len(sys.argv)>6:
-    test_type = sys.argv[6].lower()
+    compare = sys.argv[6].lower() == "true"
 
 if test_type=='t2alm':
     tstr = 't2alm'
