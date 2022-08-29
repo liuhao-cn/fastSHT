@@ -141,11 +141,12 @@ SUBROUTINE alm2t( alm, t )
     enddo
     !$acc end kernels
 
-#ifdef GPU
-    buff1 = d_buff1
-#endif
     
+#ifdef GPU
+    call fft2map( d_buff1, buff1, t )
+#else
     call fft2map( buff1, t )
+#endif
     return
 end
 
@@ -903,14 +904,14 @@ SUBROUTINE fix_eb( Q, U, mask, Bmap, almB, Btpl, vid, niter, nv, flag)
     ! if(lmax.lt.2*nside) forall(i=0:npix-1, acc_flag1(i).eq.0) buff1(:,i) = 0
     ! if(lmax.lt.2*nside) forall(i=0:npix-1, acc_flag2(i).eq.0) buff2(:,i) = 0
 
+
 #ifdef GPU
-     buff1 = d_buff1
-     buff2 = d_buff2
-#endif
-     
+    call fft2map( d_buff1, buff1, buff3) ! buff3 = B-map with leakage
+    call fft2map( d_buff2, buff2, Btpl)  ! buff4 = template of leakage
+#else
     call fft2map( buff1, buff3) ! buff3 = B-map with leakage
     call fft2map( buff2, Btpl)  ! buff4 = template of leakage
-
+#endif
     ! final linear fitting, only for the available region
     call lin_resi_mini(Btpl, buff3, Bmap, npix, nsim, vid, nv, a0_arr, a1_arr)
 
@@ -1122,14 +1123,14 @@ SUBROUTINE EB2QU( almE, almB, Q, U )
      enddo
      !$acc end kernels
 
-#ifdef GPU
-     buff1 = d_buff1
-     buff2 = d_buff2
-#endif
-     
-     call fft2map( buff1, Q )
-     call fft2map( buff2, U )
 
+#ifdef GPU
+      call fft2map( d_buff1, buff1, Q )
+      call fft2map( d_buff2, buff2, U )     
+#else
+      call fft2map( buff1, Q )
+      call fft2map( buff2, U )
+#endif
      return 
 end
 
@@ -1200,14 +1201,14 @@ SUBROUTINE E2QU( almE, Q, U )
 #endif
     enddo
     !$end kernels
-#ifdef GPU
-    buff1 = d_buff1
-    buff2 = d_buff2
-#endif
 
+#ifdef GPU
+    call fft2map( d_buff1, buff1, Q )
+    call fft2map( d_buff2, buff2, U )
+#else
     call fft2map( buff1, Q )
     call fft2map( buff2, U )
-
+#endif
     return 
 end
 

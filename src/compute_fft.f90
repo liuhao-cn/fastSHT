@@ -112,6 +112,112 @@ end
 #endif
 
 
+
+
+
+
+
+
+
+
+! Compute backward map-FFT with real-FFT and PERM-format storage, and swallow
+! the transpose job by setting the output strides.
+!
+! This program only does the backward FFT.
+!
+#ifdef GPU
+SUBROUTINE fft2map( d_fft, fft, map )
+  Use MKL_DFTI
+  use cudafor
+#ifdef GPU
+  use sht_data_module
+#else
+  use sht_data_module, only: nside, npix, nring, nsim, i1_arr, i2_arr
+#endif
+    implicit none
+
+    type(DFTI_DESCRIPTOR), POINTER  :: FFT_Handle, FFT_Handle_full
+    real(8), device                 :: d_fft(1:nsim, 0:npix-1)
+    real(8)                         :: fft(1:nsim, 0:npix-1)
+    real(8), intent(out)            :: map(0:npix-1, 1:nsim)
+    integer(4)                      :: i, j, nfft, status, strides(0:1)
+    integer(4)                      :: stat, n_finished
+    integer(4)                      :: finished(0:3*nside)
+    
+    strides(0) = 0
+    strides(1) = nsim
+
+
+    do i=0,nside-1
+       nfft   = 4*(i+1)
+       j      = nring-i-1
+       stat = cudaMemcpyAsync(fft(1:nsim,h_i1_arr(i)), d_fft(1:nsim,h_i1_arr(i)), nsim*nfft, cu_streams(i))
+       stat = cudaMemcpyAsync(fft(1:nsim,h_i1_arr(j)), d_fft(1:nsim,h_i1_arr(j)), nsim*nfft, cu_streams(i))
+    enddo
+
+    do i=nside,3*nside-2
+       stat = cudaMemcpyAsync(fft(1:nsim,h_i1_arr(i)), d_fft(1:nsim,h_i1_arr(i)), nsim*4*nside, cu_streams(i))
+
+    enddo
+
+    n_finished = 0
+    finished = 0
+    status = DftiCreateDescriptor( FFT_Handle_full, DFTI_DOUBLE,                 DFTI_REAL, 1, 4 * nside )
+    status =         DftiSetValue( FFT_Handle_full, DFTI_CONJUGATE_EVEN_STORAGE, DFTI_COMPLEX_REAL  )    
+    status =         DftiSetValue( FFT_Handle_full, DFTI_PACKED_FORMAT,          DFTI_PERM_FORMAT   )        
+    status =         DftiSetValue( FFT_Handle_full, DFTI_PLACEMENT,              DFTI_NOT_INPLACE   )
+    status =         DftiSetValue( FFT_Handle_full, DFTI_NUMBER_OF_TRANSFORMS,   int(nsim)          )                
+    status =         DftiSetValue( FFT_Handle_full, DFTI_INPUT_DISTANCE,         1                  )
+    status =         DftiSetValue( FFT_Handle_full, DFTI_INPUT_STRIDES,          strides            )
+    status =         DftiSetValue( FFT_Handle_full, DFTI_OUTPUT_DISTANCE,        int(npix)          ) 
+    status = DftiCommitDescriptor( FFT_Handle_full )
+
+    
+    do while(n_finished .lt. 3*nside-1)
+       do i=0,3*nside-2
+
+          if(finished(i) == 0) then
+             stat = cudaStreamQuery(cu_streams(i))
+          endif
+          if(finished(i) == 0 .and. stat == 0) then
+
+             n_finished = n_finished + 1
+             finished(i) = 1
+             ! create/recreate descriptor for: 1D-FFT, multi-task, out-of-place,
+             ! real-to-real, PERM-format storage, auto-transpose
+             if (i .lt. nside) then
+                nfft   = 4*(i+1)
+                j      = nring-i-1
+
+                status = DftiCreateDescriptor( FFT_Handle, DFTI_DOUBLE,                 DFTI_REAL, 1, nfft )
+                status =         DftiSetValue( FFT_Handle, DFTI_CONJUGATE_EVEN_STORAGE, DFTI_COMPLEX_REAL  )    
+                status =         DftiSetValue( FFT_Handle, DFTI_PACKED_FORMAT,          DFTI_PERM_FORMAT   )        
+                status =         DftiSetValue( FFT_Handle, DFTI_PLACEMENT,              DFTI_NOT_INPLACE   )
+                status =         DftiSetValue( FFT_Handle, DFTI_NUMBER_OF_TRANSFORMS,   int(nsim)          )                
+                status =         DftiSetValue( FFT_Handle, DFTI_INPUT_DISTANCE,         1                  )
+                status =         DftiSetValue( FFT_Handle, DFTI_INPUT_STRIDES,          strides            )
+                status =         DftiSetValue( FFT_Handle, DFTI_OUTPUT_DISTANCE,        int(npix)          ) 
+                status = DftiCommitDescriptor( FFT_Handle )
+             
+                status = DftiComputeBackward( FFT_Handle, fft(1:nsim,h_i1_arr(i)), map(h_i1_arr(i):h_i2_arr(i),1) )  
+                status = DftiComputeBackward( FFT_Handle, fft(1:nsim,h_i1_arr(j)), map(h_i1_arr(j):h_i2_arr(j),1) ) 
+        
+                ! free the handle if the next ring will have different size.
+                status = DftiFreeDescriptor( FFT_Handle )
+             else
+                nfft   = 4*nside
+                status = DftiComputeBackward( FFT_Handle_full, fft(1:nsim,h_i1_arr(i)), map(h_i1_arr(i):h_i2_arr(i),1) )
+             endif         
+          endif
+       enddo
+    enddo
+    
+    status =   DftiFreeDescriptor( FFT_Handle_full )
+
+    return
+end
+  
+#else
 ! Compute backward map-FFT with real-FFT and PERM-format storage, and swallow
 ! the transpose job by setting the output strides.
 !
@@ -173,6 +279,7 @@ SUBROUTINE fft2map( fft, map )
     return
 end
 
+#endif
 
 
 
