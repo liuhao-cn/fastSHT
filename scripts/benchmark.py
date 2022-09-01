@@ -155,7 +155,7 @@ def fix_EB(Q, U, mask, nside, lmax, niter=0, seed=23333):
         coe = np.polyfit(x, y, 1)
 
         BC[i, vid] = y - x * coe[0] - coe[1]
-    print('Time cost for fastSHT is ' + str(time.time() - start))
+    print('Time cost for Healpy is ' + str(time.time() - start))
 
     return BC
 
