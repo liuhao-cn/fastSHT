@@ -158,16 +158,10 @@ def fix_EB(Q, U, mask, nside, lmax, niter=0, seed=23333):
         x = BT[i, vid]
         y = BO[i, vid]
         coe = np.polyfit(x, y, 1)
-        
-        # mx = np.sum(x) / nv
-        # my = np.sum(y) / nv
-        # cxx = np.sum( (x - mx)**2 )
-        # cxy = np.sum( (y - my) * (x - mx) )
-        # coe = [cxy / cxx, my  - mx * (cxy / cxx) ]
-        
+                
         BC[i, vid] = BO[i, vid] - BT[i, vid] * coe[0] - coe[1]
         
-    # print('Time cost for Healpy is ' + str(time.time() - start))
+    print('Time cost for Healpy is ' + str(time.time() - start))
     return BC
 
 def test_fix_EB(seed=23333):
@@ -187,9 +181,7 @@ def test_fix_EB(seed=23333):
     if(compare == False):
         return
     
-    start = time.time()
     BC = fix_EB(Q, U, mask, nside, lmax, niter, seed)
-    print('Time cost for healpy is ' + str(time.time() - start))
 
     return (Bmap, BC)
 
