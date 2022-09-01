@@ -130,38 +130,33 @@ def make_mask(nside, upper_lat = 5):
 # In[7]:
 
 def fix_EB(Q, U, mask, nside, lmax, niter=0, seed=23333):
-    
-    T = np.asfortranarray(np.random.rand(npix, nsim))
+    T = np.zeros((npix,))
 
     vid = (np.arange(len(mask))[mask == 1])
-    nv = len(vid)
+    BC = np.zeros((nsim,npix))
 
-    maps_in = np.array( [T, Q, U ])
-    maps_in[:,mask==0,:] = hp.UNSEEN
-    
     start = time.time()
-    
-    alms2_hp = np.array([hp.map2alm(maps_in[:,:,i], lmax=lmax, iter=niter) for i in range(nsim)])
-    
-    BO = np.array([hp.alm2map(alms2_hp[i,2,:], nside=nside, lmax=lmax) for i in range(nsim)])
-    
-    alms2_hp[:,2,:] = 0
-    alms2_hp[:,0,:] = 0
-    
-    maps = np.array([hp.alm2map(alms2_hp[i,:,:], nside=nside, lmax=lmax) for i in range(nsim)])
-    maps[:,:,mask==0] = 0
-    alms2_hp = np.array([hp.map2alm(maps[i,:,:], lmax=lmax, iter=niter) for i in range(nsim)])
-    alms2_hp = alms2_hp[:,2,:]
-    BT = np.array([hp.alm2map(alms2_hp[i,:], nside=nside, lmax=lmax) for i in range(nsim)])
-    BC = np.zeros(BT.shape)
     for i in range(nsim):
-        x = BT[i, vid]
-        y = BO[i, vid]
+        maps_in = np.array( [T, Q[:,i], U[:,i]])
+        maps_in[:,mask==0] = hp.UNSEEN
+
+        alms2_hp = hp.map2alm(maps_in, lmax=lmax, iter=niter)
+        BO = hp.alm2map(alms2_hp[2,:], nside=nside, lmax=lmax)
+
+        alms2_hp[2,:] = 0
+        alms2_hp[0,:] = 0
+        maps = hp.alm2map(alms2_hp, nside=nside, lmax=lmax)
+        maps[:,mask==0] = 0
+        alms2_hp = hp.map2alm(maps, lmax=lmax, iter=niter)
+        BT = hp.alm2map(alms2_hp[2,:], nside=nside, lmax=lmax)
+
+        x = BT[vid]
+        y = BO[vid]
         coe = np.polyfit(x, y, 1)
-                
-        BC[i, vid] = BO[i, vid] - BT[i, vid] * coe[0] - coe[1]
-        
-    print('Time cost for Healpy is ' + str(time.time() - start))
+
+        BC[i, vid] = y - x * coe[0] - coe[1]
+    print('Time cost for fastSHT is ' + str(time.time() - start))
+
     return BC
 
 def test_fix_EB(seed=23333):
