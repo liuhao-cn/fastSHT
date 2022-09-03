@@ -57,12 +57,12 @@ def test_t2alm(seed=23333):
     # print('Testing t2alm...')
 
     np.random.seed(seed)
-    maps = np.asfortranarray(np.random.rand(npix, nsim))
+    # maps = np.asfortranarray(np.random.rand(npix, nsim))
+    maps = np.ones([npix, nsim], dtype=np.double, order='F')
 
     start = time.time()
     sht = SHT.SHT(nside, lmax, nsim, niter)
-    #alms = numba.cuda.pinned_array((nsim, lmax+1, lmax+1), dtype=np.double, strides=None, order='F')
-    alms = np.empty((nsim, lmax+1, lmax+1), dtype=np.double,  order='F')
+    alms = np.ones((nsim, lmax+1, lmax+1), dtype=np.double,  order='F')
     end = time.time() - start
     # print('Time cost for memory initialization is ' + str(end))
 
@@ -74,10 +74,6 @@ def test_t2alm(seed=23333):
     #print(time.sleep(10))
     if(compare==False):
         return
-    
-    alms_hp = sht.convert_alm_healpy(alms); del alms
-    alm_shape = alms_hp.shape[0]
-    del alms_hp
 
     start = time.time()
     for i in range(nsim):
