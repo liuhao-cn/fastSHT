@@ -59,15 +59,15 @@ def test_t2alm(seed=23333):
     np.random.seed(seed)
     # maps = np.asfortranarray(np.random.rand(npix, nsim))
     maps = np.ones([npix, nsim], dtype=np.double, order='F')
+    alms = np.ones([nsim, lmax+1, lmax+1], dtype=np.double,  order='F')
 
     start = time.time()
     sht = SHT.SHT(nside, lmax, nsim, niter)
-    alms = np.ones((nsim, lmax+1, lmax+1), dtype=np.double,  order='F')
     end = time.time() - start
     # print('Time cost for memory initialization is ' + str(end))
 
     start = time.time()
-    sht.t2alm(maps, alms)
+    sht.t2alm(maps, alms_in=alms)
     end1 = time.time() - start
     # print('Calculation time cost for fastSHT is ' + str(end / nrep))
 
