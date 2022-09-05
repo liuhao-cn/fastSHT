@@ -5,11 +5,23 @@
 import sys as sys
 import os
 
+# default parameters
+nside = 64
+nsim = 2000
+n_proc = 8
+niter = 3
+compare = True
+
+
 # the command line input will overwrite the defaults
-nside = int(sys.argv[1])
-nsim = int(sys.argv[2])
-n_proc = int(sys.argv[3])
-niter = int(sys.argv[4])
+if len(sys.argv)>1:
+    nside = int(sys.argv[1])
+if len(sys.argv)>2:
+    nsim = int(sys.argv[2])
+if len(sys.argv)>3:
+    n_proc = int(sys.argv[3])
+if len(sys.argv)>4:
+    niter = int(sys.argv[4])
 
 
 os.environ["OMP_NUM_THREADS"] = str(n_proc) # export OMP_NUM_THREADS=4
@@ -42,17 +54,26 @@ lmax = 3*nside - 1
 npix = 12 * nside ** 2
 
 def test_t2alm(seed=23333):
+    # print('Testing t2alm...')
 
     np.random.seed(seed)
     # maps = np.asfortranarray(np.random.rand(npix, nsim))
     maps = np.ones([npix, nsim], dtype=np.double, order='F')
-    alms = np.ones([nsim, lmax+1, lmax+1], dtype=np.double,  order='F')
-
-    sht = SHT.SHT(nside, lmax, nsim, niter)
 
     start = time.time()
-    sht.t2alm(maps, alms_in=alms)
+    sht = SHT.SHT(nside, lmax, nsim, niter)
+    alms = np.ones((nsim, lmax+1, lmax+1), dtype=np.double,  order='F')
+    end = time.time() - start
+    # print('Time cost for memory initialization is ' + str(end))
+
+    start = time.time()
+    sht.t2alm(maps, alms)
     end1 = time.time() - start
+    # print('Calculation time cost for fastSHT is ' + str(end / nrep))
+
+    #print(time.sleep(10))
+    if(compare==False):
+        return
 
     start = time.time()
     for i in range(nsim):
@@ -63,10 +84,5 @@ def test_t2alm(seed=23333):
 
 end1, end2 = test_t2alm()
 
-
-filename = '%4.4i-%5.5i.txt' %(nside, nsim)
-with open(filename, 'a') as f:
-    sys.stdout = f
-    print("t2alm: Nside = %i, Nsim = %i, n_proc = %2i, fastSHT-CPU = %6.2f, healpy = %6.2f" 
-        %(nside, nsim, n_proc, end1, end2))
-
+print("t2alm: Nside = %i, Nsim = %i, n_proc = %2i, fastSHT-CPU = %6.2f, healpy = %6.2f" 
+    %(nside, nsim, n_proc, end1, end2))
