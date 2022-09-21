@@ -66,7 +66,7 @@ import importlib
 importlib.reload(SHT)
 
 
-nrep = 3
+nrep = 1
 lmax = 3*nside - 1
 npix = 12 * nside ** 2
 
