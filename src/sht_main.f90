@@ -814,16 +814,16 @@ SUBROUTINE fix_eb( Q, U, mask, Bmap, almB, Btpl, vid, niter, nv, flag)
     ! need almE in the end, and it is used as buff at certain places.
 
 #ifdef GPU
-    allocate( almE     (1:nsim, 0:lmax, 0:lmax) ); almE = 0
-    allocate( buff2(1:nsim, 0:npix-1) ); buff2 = 0
-    allocate( buff3(1:nsim, 0:npix-1) ); buff3 = 0
-    allocate( buff4(1:nsim, 0:npix-1) ); buff4 = 0
+    if(allocated(almE) .eq. .false.) allocate( almE     (1:nsim, 0:lmax, 0:lmax) ); almE = 0
+    if(allocated(buff2) .eq. .false.) allocate( buff2(1:nsim, 0:npix-1) ); buff2 = 0
+    if(allocated(buff3) .eq. .false.) allocate( buff3(1:nsim, 0:npix-1) ); buff3 = 0
+    if(allocated(buff4) .eq. .false.) allocate( buff4(1:nsim, 0:npix-1) ); buff4 = 0
 #else 
-    allocate( almE     (1:nsim, 0:lmax, 0:lmax) ); almE = 0
-    allocate( alm_buff1(1:nsim, 0:lmax, 0:lmax) ); alm_buff1 = 0
+    if(allocated(almE) .eq. .false.) allocate( almE     (1:nsim, 0:lmax, 0:lmax) ); almE = 0
+    if(allocated(alm_buff1) .eq. .false.) allocate( alm_buff1(1:nsim, 0:lmax, 0:lmax) ); alm_buff1 = 0
 #endif
-    allocate( a0_arr(1:nsim) ); a0_arr = 0
-    allocate( a1_arr(1:nsim) ); a1_arr = 0
+    if(allocated(a0_arr) .eq. .false.) allocate( a0_arr(1:nsim) ); a0_arr = 0
+    if(allocated(a1_arr) .eq. .false.) allocate( a1_arr(1:nsim) ); a1_arr = 0
 
     Bmap = 0
     almB = 0

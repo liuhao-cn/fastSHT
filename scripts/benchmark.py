@@ -169,7 +169,7 @@ def test_fix_EB(seed=23333):
     mask = make_mask(nside)
 
     start = time.time()
-    sht = SHT.SHT(nside, lmax, nsim, niter, pol=True)
+    sht = SHT.SHT(nside, lmax, nsim, niter, pol=True, all_buff=True)
 
     Bmap = sht.fix_eb(Q, U, mask)
     print('Time cost for fastSHT is ' + str(time.time() - start))

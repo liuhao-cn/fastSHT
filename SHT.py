@@ -14,7 +14,7 @@ import numba
 from numba import cuda
 
 class SHT:
-    def __init__(self, nside, lmax, nsim, niter=0, pol=False):
+    def __init__(self, nside, lmax, nsim, niter=0, pol=False, all_buff=False):
         self.nside = nside
         self.lmax = lmax
         self.nsim = nsim
@@ -55,6 +55,9 @@ class SHT:
         if pol == True and niter > 0:
             self.nbuff = 4
 
+        if all_buff == True:
+            self.nbuff = 4
+            
         fastSHT.sht_data_alloc(np.array((self.nside, self.lmax, self.nring, self.nsim, self.nbuff, self.pol), dtype=np.int32))
         fastSHT.sht_set_data(ring_tab[:lmax+1],plm_pos, plm_val1, plm_val2, theta, phi0)
         
