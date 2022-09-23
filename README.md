@@ -199,11 +199,27 @@ python test_fixEB.py 128 200 8 3 true # with parameters in order of nside nsim n
 
 ## 4.1. Linking errors associated with Intel MKL when import the SHT module (for installation without docker)
 
+### 4.1.a Without GPU
 Try pre-load some MKL libraries by
 
 `export LD_PRELOAD=:/opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_core.so:/opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_intel_lp64.so:/opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_intel_thread.so:/opt/intel/oneapi/compiler/latest/linux/compiler/lib/intel64_lin/libiomp5.so`
 
 where `/opt/intel` is for the case of installing oneapi with root. If oneapi is installed in a user account, then `/opt/intel` can be `/home/user_name/intel/` or `~/intel`
+
+### 4.1.b With GPU
+Similar to the above, but the last item 
+
+`/opt/intel/oneapi/compiler/latest/linux/compiler/lib/intel64_lin/libiomp5.so` 
+
+should be replaced by 
+
+`/opt/nvidia/hpc_sdk/Linux_x86_64/22.3/REDIST/compilers/lib/libomp.so`
+
+or 
+
+`/opt/nvidia/hpc_sdk/Linux_x86_64/22.7/REDIST/compilers/lib/libomp.so`
+
+where 22.3 or 22.7 depends on the nvidia hpc sdk version.
 
 ## 4.2. A known Issue for fastSHT (CPU only) without docker:
 
