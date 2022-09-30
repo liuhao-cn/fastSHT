@@ -55,6 +55,11 @@ Finally, run the docker image with the following command, which also makes /home
 sudo docker run -it -v /home:/home --gpus all rectaflex/intel_nvidia_sdk
 ```
 
+### If you would like to build a docker image from a Dockerfile, cd `/docker` and run
+```
+sudo docker build .
+```
+
 ### 2.1.2. Environment preparation for ubuntu (no docker)
 
 For non-docker users, we give a sample script for building a compilation environment for fastSHT based on an ubuntu-20.04.
@@ -123,7 +128,7 @@ source ~/.bashrc
 pip3 install healpy f90wrap
 ```
 
-If no GPU is going to be employed, one can stop here and compile the fastSHT with CPU only using the script `./compile_ifort.sh`. 
+If no GPU is going to be employed, one can stop here and compile the fastSHT with CPU only using the script `./compile.sh`. 
 If some MKL linking errors are encounted, see FAQs for solutions.
 
 #### 2.1.2.4. Continue with GPU support and install the nvidia hpc sdk:
@@ -143,7 +148,7 @@ source ~/.bashrc
 
 ## 2.2. Compilation
 
-If BOTH Intel oneAPI and Nvidia SDK are installed, use
+Use
 
 ```
 ./compile.sh # for the CPU version
@@ -153,10 +158,6 @@ or
 ./compile.sh -DGPU=on # for the GPU version
 ```
 
-If only Intel oneAPI is installed, use
-```
-./compile_ifort.sh # for general CPU version (see FAQs if linking errors are encountered)
-```
 
 ## 2.3 Check the preloads
 
@@ -167,6 +168,10 @@ export LD_PRELOAD=:$LD_PRELOAD:/opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_c
 Here `/opt/intel` is for the case of installing oneapi with root. If oneapi is installed with a user account, then `/opt/intel` should be `/home/user_name/intel/` or `~/intel`.
 
 If, by the above test, this script is found to be necessary, then one should consider adding it to ~/.bashrc for future convenience. You are very much welcome to open an issue if you have experienced other complilation diffuculties. 
+
+## 2.4 auto-installation script
+
+Run `./configure.sh` to auto install necessary environment. The default is the FULL installation of Intel ONE API and NO CUDA.  Use the argument '--part-no-python' for part installtaion of ONE API with no intel python, and '--part-with-python' for part install with the intel python. Use the argument '--with-gpu' to install NVIDIA HPC SDK to enable GPU capability.
 
 
 # 3. Examples and Testing
