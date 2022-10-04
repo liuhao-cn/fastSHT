@@ -9,8 +9,9 @@ More technical details can be found in the following work:
 
 ''Accelerating spherical harmonic transforms for a large number of sky maps'', Chi Tian, Siyu Li, and Hao Liu, https://arxiv.org/abs/2208.10154
 
-# 1)  Dependencies
+# 1)  Dependencies and quick installation
 
+## 1.1) Dependencies
 Fortran compiler `ifort` is recommanded for the CPU version, and `nvfortran` is required for the GPU version. The main dependencies and their versions are listed below:
 
 `Intel One API (2022.0.2)`
@@ -24,6 +25,19 @@ Fortran compiler `ifort` is recommanded for the CPU version, and `nvfortran` is 
 `numpy (1.21.2)`
 
 `CMake(3.22.1)`
+
+## 1.2) Quick installation
+
+A quick installation can be done by following these steps. For details and customization, please read 2) and 3).
+```
+git clone https://github.com/liuhao-cn/fastSHT.git
+
+cd fastSHT
+
+./configure.sh
+
+./compile.sh -DGPU=on
+```
 
 # 2) Environment configuration
 
