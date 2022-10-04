@@ -11,7 +11,7 @@ More technical details can be found in the following work:
 
 # 1)  Dependencies
 
-Fortran compiler `ifort` is recommended for the CPU version, and `nvfortran` is required for the GPU version. The main dependencies and their versions are listed below:
+Fortran compiler `ifort` is recommanded for the CPU version, and `nvfortran` is required for the GPU version. The main dependencies and their versions are listed below:
 
 `Intel One API (2022.0.2)`
 
@@ -82,7 +82,7 @@ To automatically install necessary environment, run
 ```
 ./configure.sh
 ``` 
-The default behavior of `configure.sh` is a FULL installation of Intel ONE API and NO CUDA.  Use the argument '--part-no-python' for part installation of ONE API with no intel python, and '--part-with-python' for part install with the Intel python. Use the argument '--with-gpu' to install NVIDIA HPC SDK to enable GPU capability.
+The default behavior of `configure.sh` is a FULL installation of Intel ONE API and NO CUDA.  Use the argument '--part-no-python' for part installtaion of ONE API with no intel python, and '--part-with-python' for part install with the intel python. Use the argument '--with-gpu' to install NVIDIA HPC SDK to enable GPU capability.
 
 ### 2.2.2) Step-by-step manual configuration
 
@@ -152,7 +152,7 @@ pip3 install healpy f90wrap
 
 If no GPU is going to be employed, one can stop here and jump to compilation.
  
-If some MKL linking errors are encountered, see FAQs for solutions.
+If some MKL linking errors are encounted, see FAQs for solutions.
 
 #### step-4) Continue with GPU support and install the nvidia hpc sdk:
 
@@ -208,12 +208,16 @@ python test_fixEB.py 128 200 8 3 true # with parameters in order of nside nsim n
 
 # 5) FAQs
 
-## 5.1) Linking errors associated with Intel MKL when import the SHT module (for non-docker installation)
+## 5.1) Linking errors associated with Intel MKL
+
+For a non-docker installation, a linking error may occur when attempting to import the python module `SHT`. This can be fixed by defining the preload paths:
 
 ### The CPU-only case
 Try pre-load some MKL libraries by
 
-`export LD_PRELOAD=:/opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_core.so:/opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_intel_lp64.so:/opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_intel_thread.so:/opt/intel/oneapi/compiler/latest/linux/compiler/lib/intel64_lin/libiomp5.so`
+```
+export LD_PRELOAD=:/opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_core.so:/opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_intel_lp64.so:/opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_intel_thread.so:/opt/intel/oneapi/compiler/latest/linux/compiler/lib/intel64_lin/libiomp5.so
+```
 
 where `/opt/intel` is for the case of installing oneapi with root. If oneapi is installed in a user account, then `/opt/intel` can be `/home/user_name/intel/` or `~/intel`
 
@@ -221,11 +225,15 @@ where `/opt/intel` is for the case of installing oneapi with root. If oneapi is 
 
 Similar to the above, but the last item 
 
-`/opt/intel/oneapi/compiler/latest/linux/compiler/lib/intel64_lin/libiomp5.so` 
+```
+/opt/intel/oneapi/compiler/latest/linux/compiler/lib/intel64_lin/libiomp5.so
+``` 
 
 should be replaced by 
 
-`/opt/nvidia/hpc_sdk/Linux_x86_64/22.3/REDIST/compilers/lib/libomp.so`
+```
+/opt/nvidia/hpc_sdk/Linux_x86_64/22.3/REDIST/compilers/lib/libomp.so
+```
 
 or 
 
@@ -233,7 +241,7 @@ or
 
 where 22.3 or 22.7 depends on the nvidia hpc sdk version. Because the GPU version uses a different omp library.
 
-If, the above preload script is found to be necessary, then one should consider adding it to ~/.bashrc for future convenience. You are very much welcome to open an issue if you have experienced other compilation difficulties. 
+If, the above preload script is found to be necessary, then one should consider adding it to ~/.bashrc for future convenience. You are very much welcome to open an issue if you have experienced other complilation diffuculties. 
 
 ## 5.2. A known Issue for fastSHT (CPU only) without docker:
 
