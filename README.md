@@ -74,7 +74,7 @@ which makes all GPUs available in docker and also makes `/home` available, so if
 
 ## 2.2) Environment configuration without docker (for ubuntu 20.04)
 
-The environment configuration without docker is tested for ubuntu 20.04, and can be done either with the auto-configuration script or a step-by-step manual configuration.
+The environment configuration without docker is tested for ubuntu 20.04, and can be done either with the auto-configuration script (2.2.1) or a step-by-step manual configuration (2.2.2).
 
 ### 2.2.1) Auto-configuration script
 
