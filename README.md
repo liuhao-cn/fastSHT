@@ -1,4 +1,5 @@
 
+
 # 0. Introduction
 
 fastSHT is a fast toolkit for doing spherical harmonic transforms on a large number of spherical maps. It converts massive SHT operations to a BLAS level 3 problem and uses the highly optimized matrix multiplication toolkit to accelerate the computation. GPU acceleration is supported and can be very effective. The core code is written in Fortran, but a Python wrapper is provided and recommended.
@@ -52,18 +53,22 @@ git clone https://github.com/liuhao-cn/fastSHT.git
 
 Here we assume docker is already installed and available. See https://docs.docker.com/engine/install/ for a docker installation instruction.
 
+### Step-1: prepare the docker image
+
 The first step of configuration with docker is to prepare the docker image. This can be done in one of the following two ways:
 
-A) Build the image locally from a Dockerfile (uses less disk space):
+#### Step-1-way-1) build the image locally from a Dockerfile (uses less disk space):
 ```
 cd ./docker
 sudo docker build -t fastsht:gpu . 
 ```
-B) Pull the pre-built image (uses more disk space):
+#### Step-1-way-2) pull the pre-built image (uses more disk space):
 ```
 sudo docker pull rectaflex/intel_nvidia_sdk
 sudo docker image tag rectaflex/intel_nvidia_sdk fastsht:gpu
 ```
+
+### Step-2: install the Nvidia container runtime
 
 When the docker image is prepared, one needs to install the Nvidia container runtime by
 
@@ -80,6 +85,9 @@ sudo apt-get install nvidia-container-runtime
 
 sudo systemctl restart docker
 ```
+
+### Step-3: run the docker image
+
 Finally, run the docker image with the following command: 
 ```
 sudo docker run -it -v /home:/home --gpus all fastsht:gpu
@@ -121,7 +129,7 @@ sudo apt-get install cmake
 
 Choose one of the following two ways to Install Intel oneapi. Way 2 is a partial installation that uses less disk space.
 
-##### step-2-way 1: via sudo apt install
+##### step-2-way-1) via sudo apt install
 
 ```
 wget -O- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB \ | gpg --dearmor | sudo tee /usr/share/keyrings/oneapi-archive-keyring.gpg > /dev/null
@@ -137,7 +145,7 @@ sed -i '1 i\source /opt/intel/oneapi/setvars.sh > /dev/null' ~/.bashrc
 source ~/.bashrc
 ```
 
-##### step-2-way 2: a partial installation that saves disk space
+##### step-2-way-2) a partial installation that saves disk space
 
 ```
 # Download the Intel oneapi installation packages
