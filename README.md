@@ -1,71 +1,92 @@
+
 # 0. Introduction
 
-fastSHT is a fast toolkit for doing spherical harmonic transforms on a large number of spherical maps. It converts massive SHT operations to a BLAS level 3 problem and uses the highly optimized matrix multiplication toolkit to accelerate the computation. GPU acceleration is supported and can be very effective. Core code is written in fortran but a Python wrapper is provided and recommended.
+fastSHT is a fast toolkit for doing spherical harmonic transforms on a large number of spherical maps. It converts massive SHT operations to a BLAS level 3 problem and uses the highly optimized matrix multiplication toolkit to accelerate the computation. GPU acceleration is supported and can be very effective. The core code is written in Fortran, but a Python wrapper is provided and recommended.
 
-To ensure a precise result, fastSHT uses double precision floating numbers (FP64) by default, which prefers a GPU hardware with high FP64 performance. Therefore, the currently best choice is NVIDIA A100 (til Aug-2022), which provides a full-speed FP64 computation with its tensor cores (same performance for double and single precisions).
+To ensure a precise result, fastSHT uses double precision floating numbers (FP64) by default, which prefers GPU hardware with high FP64 performance. Therefore, the current best choice is the NVIDIA A100 (till Aug-2022), which provides a full-speed FP64 computation with its tensor cores (same performance for double and single precisions).
 
-More details can be found in the following work: 
+More technical details can be found in the following work: 
 
 ''Accelerating spherical harmonic transforms for a large number of sky maps'', Chi Tian, Siyu Li, and Hao Liu, https://arxiv.org/abs/2208.10154
 
-# 1. Dependencies
+# 1)  Dependencies
 
-Fortran compiler: `ifort` is recommanded for the CPU version; `nvfortran` is required for the GPU version. The softwares and their versions we used for our tests are listed below:
+Fortran compiler `ifort` is recommended for the CPU version, and `nvfortran` is required for the GPU version. The main dependencies and their versions are listed below:
 
-Intel One API (2022.0.2)
+`Intel One API (2022.0.2)`
 
-Nvidia HPC SDK (22.3)
+`Nvidia HPC SDK (22.3 or 22.7)`
 
 `f90wrap (v0.2.7)`  (https://github.com/jameskermode/f90wrap)
 
-`Python3 (3.9.7)`, `numpy (1.21.2)`, `CMake(3.22.1)`
+`Python3 (3.9.7)`
 
-# 2. Installation
+`numpy (1.21.2)`
 
+`CMake(3.22.1)`
 
-## 2.1. Before compilation 
+# 2) Environment configuration
 
-Dependencies and system PATH should be configured properly. 
+The build dependencies and system PATH should be configured properly.  This can be done by following either 2.1 (with docker) or 2.2 (no docker).
 
-One can choose either 2.1.1 (with docker) or 2.1.2 (no docker), but there is no need to do both.
+First of all, clone the repository:
+```
+git clone https://github.com/liuhao-cn/fastSHT.git
+```
 
-### 2.1.1. Environment preparation with docker (much easier)
+## 2.1) Environment configuration with docker
 
-See https://docs.docker.com/engine/install/ for a docker installation instruction
+Here we assume docker is already installed and available. See https://docs.docker.com/engine/install/ for a docker installation instruction.
 
-With docker installed, use
+The first step of configuration with docker is to prepare the docker image. This can be done in one of the following two ways:
 
+A) Build the image locally from a Dockerfile (uses less disk space):
+```
+cd ./docker
+sudo docker build -t fastsht:gpu . 
+```
+B) Pull the pre-built image (uses more disk space):
 ```
 sudo docker pull rectaflex/intel_nvidia_sdk
+sudo docker image tag rectaflex/intel_nvidia_sdk fastsht:gpu
 ```
-to pull the docker image.
 
-To enable GPU in a docker container, the Nvidia container runtime is needed, and it can be installed by 
+When the docker image is prepared, one needs to install the Nvidia container runtime by
 
 ```
 curl -s -L https://nvidia.github.io/nvidia-container-runtime/gpgkey |   sudo apt-key add -
+
 distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
+
 curl -s -L https://nvidia.github.io/nvidia-container-runtime/$distribution/nvidia-container-runtime.list |   sudo tee /etc/apt/sources.list.d/nvidia-container-runtime.list
+
 sudo apt-get update
+
 sudo apt-get install nvidia-container-runtime
+
 sudo systemctl restart docker
 ```
-Finally, run the docker image with the following command, which also makes /home available in docker, so if one clone the fastSHT repository to the home directory, it will be available in docker.
+Finally, run the docker image with the following command: 
 ```
-sudo docker run -it -v /home:/home --gpus all rectaflex/intel_nvidia_sdk
+sudo docker run -it -v /home:/home --gpus all fastsht:gpu
 ```
+which makes all GPUs available in docker and also makes `/home` available, so if one clones the fastSHT repository to `/home` on the host machine, it will be available in docker.
 
-### If you would like to build a docker image from a Dockerfile, cd `/docker` and run
+## 2.2) Environment configuration without docker (for ubuntu 20.04)
+
+The environment configuration without docker is tested for ubuntu 20.04, and can be done either with the auto-configuration script or a step-by-step manual configuration.
+
+### 2.2.1) Auto-configuration script
+
+To automatically install necessary environment, run 
 ```
-sudo docker build .
-```
+./configure.sh
+``` 
+The default behavior of `configure.sh` is a FULL installation of Intel ONE API and NO CUDA.  Use the argument '--part-no-python' for part installation of ONE API with no intel python, and '--part-with-python' for part install with the Intel python. Use the argument '--with-gpu' to install NVIDIA HPC SDK to enable GPU capability.
 
-### 2.1.2. Environment preparation for ubuntu (no docker)
+### 2.2.2) Step-by-step manual configuration
 
-For non-docker users, we give a sample script for building a compilation environment for fastSHT based on an ubuntu-20.04.
-
-#### 2.1.2.1. Install recent cmake
-
+#### step-1) Install recent cmake
 ```
 sudo apt update
 
@@ -82,11 +103,11 @@ sudo apt-get update
 sudo apt-get install cmake
 ```
 
-#### 2.1.2.2. Install Intel oneapi
+#### step-2) Install Intel oneapi
 
-Choose one way from 2.1.2.2.a and 2.1.2.2.b to Install Intel oneapi. The latter is a partial installation that uses less disk space.
+Choose one of the following two ways to Install Intel oneapi. Way 2 is a partial installation that uses less disk space.
 
-#### 2.1.2.2.a. Install oneapi, way 1: via sudo apt install
+##### step-2-way 1: via sudo apt install
 
 ```
 wget -O- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB \ | gpg --dearmor | sudo tee /usr/share/keyrings/oneapi-archive-keyring.gpg > /dev/null
@@ -98,10 +119,11 @@ sudo apt-get update
 sudo apt install intel-basekit intel-hpckit
 
 sed -i '1 i\source /opt/intel/oneapi/setvars.sh > /dev/null' ~/.bashrc
+
 source ~/.bashrc
 ```
 
-#### 2.1.2.2.b. Install oneapi, way 2: a partial installation that saves disk space
+##### step-2-way 2: a partial installation that saves disk space
 
 ```
 # Download the Intel oneapi installation packages
@@ -122,16 +144,17 @@ sed -i '1 i\source /opt/intel/oneapi/setvars.sh > /dev/null' ~/.bashrc
 source ~/.bashrc
 ```
 
-#### 2.1.2.3. Install healpy and f90wrap
+#### step-3) Install healpy and f90wrap
 
 ```
 pip3 install healpy f90wrap
 ```
 
-If no GPU is going to be employed, one can stop here and compile the fastSHT with CPU only using the script `./compile.sh`. 
-If some MKL linking errors are encounted, see FAQs for solutions.
+If no GPU is going to be employed, one can stop here and jump to compilation.
+ 
+If some MKL linking errors are encountered, see FAQs for solutions.
 
-#### 2.1.2.4. Continue with GPU support and install the nvidia hpc sdk:
+#### step-4) Continue with GPU support and install the nvidia hpc sdk:
 
 ```
 echo 'deb [trusted=yes] https://developer.download.nvidia.com/hpc-sdk/ubuntu/amd64 /' | sudo tee /etc/apt/sources.list.d/nvhpc.list
@@ -143,40 +166,23 @@ sudo apt-get install -y nvhpc-22-3
 sed -i '1 i\export PATH="/opt/nvidia/hpc_sdk/Linux_x86_64/22.3/compilers/bin/:$PATH"' ~/.bashrc
 
 source ~/.bashrc
-
 ```
 
-## 2.2. Compilation
+# 3) Compilation
 
-Use
-
+Use the following command to compile the CPU version:
 ```
-./compile.sh # for the CPU version
+./compile.sh
 ```
-or
+or the following command to compile the GPU version:
 ```
-./compile.sh -DGPU=on # for the GPU version
+./compile.sh -DGPU=on
 ```
 
 
-## 2.3 Check the preloads
+# 4) Examples and test scripts
 
-On some systems one needs to define the preload path; however, on some other systems this should be avoided. Therefore, one should try adding the following preload paths only if one encounters linking errors while importing the SHT python module (mostly these errors regard the openmp libraries). 
-```
-export LD_PRELOAD=:$LD_PRELOAD:/opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_core.so:/opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_intel_lp64.so:/opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_intel_thread.so:/opt/intel/oneapi/compiler/latest/linux/compiler/lib/intel64_lin/libiomp5.so
-```
-Here `/opt/intel` is for the case of installing oneapi with root. If oneapi is installed with a user account, then `/opt/intel` should be `/home/user_name/intel/` or `~/intel`.
-
-If, by the above test, this script is found to be necessary, then one should consider adding it to ~/.bashrc for future convenience. You are very much welcome to open an issue if you have experienced other complilation diffuculties. 
-
-## 2.4 auto-installation script
-
-Run `./configure.sh` to auto install necessary environment. The default is the FULL installation of Intel ONE API and NO CUDA.  Use the argument '--part-no-python' for part installtaion of ONE API with no intel python, and '--part-with-python' for part install with the intel python. Use the argument '--with-gpu' to install NVIDIA HPC SDK to enable GPU capability.
-
-
-# 3. Examples and Testing
-
-First go to folder ''scripts'', and then:
+First `cd ./scripts` and then run one of the following scripts: 
 
 A python file that demonstrates the basic interfaces:
 ```
@@ -200,18 +206,19 @@ python test_fixEB.py  # with default parameters
 python test_fixEB.py 128 200 8 3 true # with parameters in order of nside nsim n_proc niter comparison_flag 
 ```
 
-# 4. FAQs
+# 5) FAQs
 
-## 4.1. Linking errors associated with Intel MKL when import the SHT module (for installation without docker)
+## 5.1) Linking errors associated with Intel MKL when import the SHT module (for non-docker installation)
 
-### 4.1.a Without GPU
+### The CPU-only case
 Try pre-load some MKL libraries by
 
 `export LD_PRELOAD=:/opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_core.so:/opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_intel_lp64.so:/opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_intel_thread.so:/opt/intel/oneapi/compiler/latest/linux/compiler/lib/intel64_lin/libiomp5.so`
 
 where `/opt/intel` is for the case of installing oneapi with root. If oneapi is installed in a user account, then `/opt/intel` can be `/home/user_name/intel/` or `~/intel`
 
-### 4.1.b With GPU
+### The case with GPU
+
 Similar to the above, but the last item 
 
 `/opt/intel/oneapi/compiler/latest/linux/compiler/lib/intel64_lin/libiomp5.so` 
@@ -224,9 +231,11 @@ or
 
 `/opt/nvidia/hpc_sdk/Linux_x86_64/22.7/REDIST/compilers/lib/libomp.so`
 
-where 22.3 or 22.7 depends on the nvidia hpc sdk version.
+where 22.3 or 22.7 depends on the nvidia hpc sdk version. Because the GPU version uses a different omp library.
 
-## 4.2. A known Issue for fastSHT (CPU only) without docker:
+If, the above preload script is found to be necessary, then one should consider adding it to ~/.bashrc for future convenience. You are very much welcome to open an issue if you have experienced other compilation difficulties. 
+
+## 5.2. A known Issue for fastSHT (CPU only) without docker:
 
 If intel oneapi is installed with a user account, then one may need to run the following command before compiling:
 ```
@@ -234,6 +243,6 @@ export MKL_DIR=~/lib/cmake/mkl-xxxx.x.x/
 ```
 where xxxx.x.x is the mkl version number.
 
-# 5. Citing fastSHT
+# 6. Citing fastSHT
 
 ``Accelerating spherical harmonic transforms for a large number of sky maps'', Chi Tian, Siyu Li, and Hao Liu, https://arxiv.org/abs/2208.10154
