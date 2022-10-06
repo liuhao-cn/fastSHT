@@ -37,7 +37,7 @@ cd fastSHT
 
 ./configure.sh
 
-./compile.sh -DGPU=on
+./compile.sh -DGPU=on/off
 ```
 
 # 2) Environment configuration
@@ -104,7 +104,7 @@ To automatically install necessary environment, run
 ```
 ./configure.sh
 ``` 
-The default behavior of `configure.sh` is a FULL installation of Intel ONE API and NO CUDA.  Use the argument '--part-no-python' for part installtaion of ONE API with no intel python, and '--part-with-python' for part install with the intel python. Use the argument '--with-gpu' to install NVIDIA HPC SDK to enable GPU capability.
+The default behavior of `configure.sh` is a FULL installation of Intel ONE API and NVIDIA HPC SKD.  Use the argument '--cpu-skip' or '--cpu-skip1' for part installtaion of ONE API with intel python, and '--cpu-skip2' for part install without intel python. Use the argument '--gpu-skip' to skip the installation of NVIDIA HPC SDK, and therefore disable the GPU support.
 
 ### 2.2.2) Step-by-step manual configuration
 
