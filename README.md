@@ -192,13 +192,13 @@ source ~/.bashrc
 
 # 3) Compilation
 
-Use the following command to compile the CPU version:
+The GPU version will be compiled by default. Use the following command to compile the CPU version:
 ```
-./compile.sh
+./compile.sh -DGPU=off
 ```
 or the following command to compile the GPU version:
 ```
-./compile.sh -DGPU=on
+./compile.sh
 ```
 
 
