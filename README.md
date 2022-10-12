@@ -1,5 +1,7 @@
 
 
+
+
 # 0. Introduction
 
 fastSHT is a fast toolkit for doing spherical harmonic transforms on a large number of spherical maps. It converts massive SHT operations to a BLAS level 3 problem and uses the highly optimized matrix multiplication toolkit to accelerate the computation. GPU acceleration is supported and can be very effective. The core code is written in Fortran, but a Python wrapper is provided and recommended.
@@ -13,7 +15,7 @@ More technical details can be found in the following work:
 # 1)  Dependencies and quick installation
 
 ## 1.1) Dependencies
-Fortran compiler `ifort` is recommanded for the CPU version, and `nvfortran` is required for the GPU version. The main dependencies and their versions are listed below:
+Fortran compiler `ifort` is recommended for the CPU version, and `nvfortran` is required for the GPU version. The main dependencies and their versions are listed below:
 
 `Intel One API (2022.0.2)`
 
@@ -29,7 +31,7 @@ Fortran compiler `ifort` is recommanded for the CPU version, and `nvfortran` is 
 
 ## 1.2) Quick installation
 
-A quick installation can be done by following these steps. For details and customization, please read 2) and 3).
+A quick installation can be done by the steps below, which is a full installation with both CPU and GPU (without docker).  
 ```
 git clone https://github.com/liuhao-cn/fastSHT.git
 
@@ -37,8 +39,25 @@ cd fastSHT
 
 ./configure.sh
 
-./compile.sh -DGPU=on/off
+./compile.sh
 ```
+The default behavior of `configure.sh` is a full installation of Intel ONE API and NVIDIA HPC SDK, and the following options are also supported:
+```
+# skip the installation of NVIDIA HPC SDK, and therefore disable the GPU support.
+configure.sh –gpu-skip
+
+# install only the necessary parts of Intel ONE API (including intel python). Same as `–cpu-skip`.
+configure.sh –cpu-skip1
+
+# install only the necessary parts of Intel ONE API, and also skip intel python.
+configure.sh –cpu-skip2 
+```
+The default behavior of `compile.sh` is to compile the code with GPU support, and the following option is supported:
+```
+# compile without the GPU support.
+./compile.sh -DGPU=off
+```
+One can also choose: configuration with docker (2.1), or a step-by-step non-docker configuration (2.2).
 
 # 2) Environment configuration
 
@@ -94,19 +113,9 @@ sudo docker run -it -v /home:/home --gpus all fastsht:gpu
 ```
 which makes all GPUs available in docker and also makes `/home` available, so if one clones the fastSHT repository to `/home` on the host machine, it will be available in docker.
 
-## 2.2) Environment configuration without docker (for ubuntu 20.04)
+## 2.2) Step-by-step configuration without docker (for ubuntu 20.04)
 
-The environment configuration without docker is tested for ubuntu 20.04, and can be done either with the auto-configuration script (2.2.1) or a step-by-step manual configuration (2.2.2).
-
-### 2.2.1) Auto-configuration script
-
-To automatically install necessary environment, run 
-```
-./configure.sh
-``` 
-The default behavior of `configure.sh` is a FULL installation of Intel ONE API and NVIDIA HPC SKD.  Use the argument '--cpu-skip' or '--cpu-skip1' for part installtaion of ONE API with intel python, and '--cpu-skip2' for part install without intel python. Use the argument '--gpu-skip' to skip the installation of NVIDIA HPC SDK, and therefore disable the GPU support.
-
-### 2.2.2) Step-by-step manual configuration
+The environment configuration without docker is tested for ubuntu 20.04, and can be done either with the auto-configuration script (1.2) or a step-by-step manual configuration:
 
 #### step-1) Install recent cmake
 ```
@@ -148,7 +157,7 @@ source ~/.bashrc
 ##### step-2-way-2) a partial installation that saves disk space
 
 ```
-# Download the Intel oneapi installation packages
+# Download the Intel ONE API installation packages
 wget https://registrationcenter-download.intel.com/akdlm/irc_nas/18673/l_BaseKit_p_2022.2.0.262_offline.sh
 wget https://registrationcenter-download.intel.com/akdlm/irc_nas/18679/l_HPCKit_p_2022.2.0.191_offline.sh
 
@@ -174,7 +183,7 @@ pip3 install healpy f90wrap
 
 If no GPU is going to be employed, one can stop here and jump to compilation.
  
-If some MKL linking errors are encounted, see FAQs for solutions.
+If some MKL linking errors are encountered, see FAQs for solutions.
 
 #### step-4) Continue with GPU support and install the nvidia hpc sdk:
 
@@ -263,7 +272,7 @@ or
 
 where 22.3 or 22.7 depends on the nvidia hpc sdk version. Because the GPU version uses a different omp library.
 
-If, the above preload script is found to be necessary, then one should consider adding it to ~/.bashrc for future convenience. You are very much welcome to open an issue if you have experienced other complilation diffuculties. 
+If, the above preload script is found to be necessary, then one should consider adding it to ~/.bashrc for future convenience. You are very much welcome to open an issue if you have experienced other compilation difficulties. 
 
 ## 5.2. A known Issue for fastSHT (CPU only) without docker:
 
