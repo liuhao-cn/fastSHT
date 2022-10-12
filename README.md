@@ -44,13 +44,13 @@ cd fastSHT
 The default behavior of `configure.sh` is a full installation of Intel ONE API and NVIDIA HPC SDK, and the following options are also supported:
 ```
 # skip the installation of NVIDIA HPC SDK, and therefore disable the GPU support.
-configure.sh –gpu-skip
+configure.sh --gpu-skip
 
-# install only the necessary parts of Intel ONE API (including intel python). Same as `–cpu-skip`.
-configure.sh –cpu-skip1
+# install only the necessary parts of Intel ONE API (including intel python). Same as `--cpu-skip`.
+configure.sh --cpu-skip1
 
 # install only the necessary parts of Intel ONE API, and also skip intel python.
-configure.sh –cpu-skip2 
+configure.sh --cpu-skip2 
 ```
 The default behavior of `compile.sh` is to compile the code with GPU support, and the following option is supported:
 ```
