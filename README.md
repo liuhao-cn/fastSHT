@@ -8,7 +8,7 @@ fastSHT is a fast toolkit for doing spherical harmonic transforms on a large num
 
 To ensure a precise result, fastSHT uses double precision floating numbers (FP64) by default, which prefers GPU hardware with high FP64 performance. Therefore, the current best choice is the NVIDIA A100 (till Aug-2022), which provides a full-speed FP64 computation with its tensor cores (same performance for double and single precisions).
 
-More technical details can be found in the following work: 
+More technical details can be found in the following work:
 
 ''Accelerating spherical harmonic transforms for a large number of sky maps'', Chi Tian, Siyu Li, and Hao Liu, https://arxiv.org/abs/2208.10154
 
@@ -31,7 +31,7 @@ Fortran compiler `ifort` is recommended for the CPU version, and `nvfortran` is 
 
 ## 1.2) Quick installation
 
-A quick installation can be done by the steps below, which is a full installation with both CPU and GPU (without docker).  
+A quick installation can be done by the steps below, which is a full installation with both CPU and GPU (without docker).
 ```
 git clone https://github.com/liuhao-cn/fastSHT.git
 
@@ -39,8 +39,13 @@ cd fastSHT
 
 ./configure.sh
 
+```
+
+If you would compile the fastSHT again, using
+```
 ./compile.sh
 ```
+
 The default behavior of `configure.sh` is a full installation of Intel ONE API and NVIDIA HPC SDK, and the following options are also supported:
 ```
 # skip the installation of NVIDIA HPC SDK, and therefore disable the GPU support.
@@ -50,7 +55,7 @@ configure.sh --gpu-skip
 configure.sh --cpu-skip1
 
 # install only the necessary parts of Intel ONE API, and also skip intel python.
-configure.sh --cpu-skip2 
+configure.sh --cpu-skip2
 ```
 The default behavior of `compile.sh` is to compile the code with GPU support, and the following option is supported:
 ```
@@ -79,7 +84,7 @@ The first step of configuration with docker is to prepare the docker image. This
 #### Step-1-way-1) build the image locally from a Dockerfile (uses less disk space):
 ```
 cd ./docker
-sudo docker build -t fastsht:gpu . 
+sudo docker build -t fastsht:gpu .
 ```
 #### Step-1-way-2) pull the pre-built image (uses more disk space):
 ```
@@ -107,7 +112,7 @@ sudo systemctl restart docker
 
 ### Step-3: run the docker image
 
-Finally, run the docker image with the following command: 
+Finally, run the docker image with the following command:
 ```
 sudo docker run -it -v /home:/home --gpus all fastsht:gpu
 ```
@@ -182,7 +187,7 @@ pip3 install healpy f90wrap
 ```
 
 If no GPU is going to be employed, one can stop here and jump to compilation.
- 
+
 If some MKL linking errors are encountered, see FAQs for solutions.
 
 #### step-4) Continue with GPU support and install the nvidia hpc sdk:
@@ -213,7 +218,7 @@ or the following command to compile the GPU version:
 
 # 4) Examples and test scripts
 
-First `cd ./scripts` and then run one of the following scripts: 
+First `cd ./scripts` and then run one of the following scripts:
 
 A python file that demonstrates the basic interfaces:
 ```
@@ -234,7 +239,7 @@ python benchmarks.py 128 1000 8 3 t2alm false # with parameters in order of nsid
 A test-and-benchmark code for the fix-EB job:
 ```
 python test_fixEB.py  # with default parameters
-python test_fixEB.py 128 200 8 3 true # with parameters in order of nside nsim n_proc niter comparison_flag 
+python test_fixEB.py 128 200 8 3 true # with parameters in order of nside nsim n_proc niter comparison_flag
 ```
 
 # 5) FAQs
@@ -254,25 +259,25 @@ where `/opt/intel` is for the case of installing oneapi with root. If oneapi is 
 
 ### The case with GPU
 
-Similar to the above, but the last item 
+Similar to the above, but the last item
 
 ```
 /opt/intel/oneapi/compiler/latest/linux/compiler/lib/intel64_lin/libiomp5.so
-``` 
+```
 
-should be replaced by 
+should be replaced by
 
 ```
 /opt/nvidia/hpc_sdk/Linux_x86_64/22.3/REDIST/compilers/lib/libomp.so
 ```
 
-or 
+or
 
 `/opt/nvidia/hpc_sdk/Linux_x86_64/22.7/REDIST/compilers/lib/libomp.so`
 
 where 22.3 or 22.7 depends on the nvidia hpc sdk version. Because the GPU version uses a different omp library.
 
-If, the above preload script is found to be necessary, then one should consider adding it to ~/.bashrc for future convenience. You are very much welcome to open an issue if you have experienced other compilation difficulties. 
+If, the above preload script is found to be necessary, then one should consider adding it to ~/.bashrc for future convenience. You are very much welcome to open an issue if you have experienced other compilation difficulties.
 
 ## 5.2. A known Issue for fastSHT (CPU only) without docker:
 
