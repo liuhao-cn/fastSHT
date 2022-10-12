@@ -184,6 +184,8 @@ case $p2 in
 	    if [[ "$p1" == "--cpu-skip1" ||  "$p1" == "--cpu-skip2" ]]; then
 	        sed -i '1 i\export LD_PRELOAD=:/opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_core.so:/opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_intel_lp64.so:/opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_intel_thread.so:/opt/intel/oneapi/compiler/latest/linux/compiler/lib/intel64_lin/libiomp5.so' ~/.bashrc
 	    fi
+	    source ~/.bashrc
+	    ./compile.sh -DGPU=off
 	    ;;
     *)
  	    echo 'deb [trusted=yes] https://developer.download.nvidia.com/hpc-sdk/ubuntu/amd64 /' | sudo tee /etc/apt/sources.list.d/nvhpc.list
@@ -209,7 +211,6 @@ case $p2 in
 	    fi
 
 	    source ~/.bashrc
+	    ./compile.sh -DGPU=on
 	    ;;
-
-
 esac
