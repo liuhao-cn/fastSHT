@@ -61,8 +61,8 @@ class SHT:
         fastSHT.sht_data_alloc(np.array((self.nside, self.lmax, self.nring, self.nsim, self.nbuff, self.pol), dtype=np.int32))
         fastSHT.sht_set_data(ring_tab[:lmax+1],plm_pos, plm_val1, plm_val2, theta, phi0)
         
-    def t2alm(self, maps, alms_in=None, method='old'):
-        if(alms_in is None):
+    def t2alm(self, maps, alms_in=None, method='old', get_alm=True):
+        if(alms_in is None and get_alm == True):
             try:
                 alms = numba.cuda.pinned_array((self.nsim, self.lmax+1, self.lmax+1), dtype=np.double, strides=None, order='F')
             except:
@@ -70,12 +70,21 @@ class SHT:
         else:
             alms = alms_in
 
-        if(self.niter == 0):
-            fastSHT.t2alm(maps, alms)
-        elif(method == 'old'):
-            fastSHT.t2alm_iter_old(maps, alms, self.niter)
+        if(get_alm == False):
+            if(self.niter == 0):
+                fastSHT.t2alm(maps)
+            elif(method == 'old'):
+                fastSHT.t2alm_iter_old(maps, self.niter)
+            else:
+                fastSHT.t2alm_iter(maps, self.niter)
+            return
         else:
-            fastSHT.t2alm_iter(maps, alms, self.niter)
+            if(self.niter == 0):
+                fastSHT.t2alm(maps, alms)
+            elif(method == 'old'):
+                fastSHT.t2alm_iter_old(maps, self.niter, alms)
+            else:
+                fastSHT.t2alm_iter(maps, self.niter, alms)
 
         if(alms_in is None):
             return alms
@@ -184,3 +193,19 @@ class SHT:
         alms_hp = alms_hp[0,:,:] + 1j * alms_hp[1,:,:]
 
         return alms_hp
+
+
+    def get_alm(self, alms_in=None):
+        if(alms_in is None):
+            try:
+                alms = numba.cuda.pinned_array((self.nsim, self.lmax+1, self.lmax+1), dtype=np.double, strides=None, order='F')
+            except:
+                alms = np.ones((self.nsim, self.lmax+1, self.lmax+1), dtype=np.double, order='F')
+        else:
+            alms = alms_in
+
+        fastSHT.get_alm(alms)
+        if(alms_in is None):
+            return alms
+        else:
+            return 0

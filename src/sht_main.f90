@@ -45,14 +45,16 @@ SUBROUTINE t2alm( t, alm )
   
     ! Main input/output, alm is saved as a real-value square matrix
     real(8), intent(in)  :: t(0:npix-1, 1:nsim) 
-    real(8), intent(out) :: alm(1:nsim, 0:lmax, 0:lmax)
     integer(4) :: beginning, end, tot_beginning, tot_end
     real(8) :: rate
     ! scalar variables
     integer(4)           :: m
 
 #ifdef GPU
+    real(8), optional, intent(out) :: alm(1:nsim, 0:lmax, 0:lmax)
     integer  :: stat
+#else
+    real(8), intent(out) :: alm(1:nsim, 0:lmax, 0:lmax)
 #endif
     
 #ifdef GPU
@@ -78,7 +80,9 @@ SUBROUTINE t2alm( t, alm )
 
 
 #ifdef GPU
-     alm = d_alm
+     if( present(alm) ) then
+        alm = d_alm
+     endif
 #endif
 
     return
@@ -164,7 +168,7 @@ end
 
 
 ! Similar to t2alm_iter, but use "immediate update" to improve the accuracy.
-SUBROUTINE t2alm_iter( t, alm, niter )
+SUBROUTINE t2alm_iter( t, niter, alm )
     use sht_data_module
 #ifdef GPU
     use cublas_v2
@@ -174,7 +178,6 @@ SUBROUTINE t2alm_iter( t, alm, niter )
 
     ! Main input/output, alm is saved as a real-value square matrix
     real(8), intent(in)     :: t(0:npix-1, 1:nsim)
-    real(8), intent(out)    :: alm(1:nsim, 0:lmax, 0:lmax)
 
     ! scalar variables
     integer(4), intent(in)  :: niter
@@ -182,6 +185,9 @@ SUBROUTINE t2alm_iter( t, alm, niter )
 
 #ifdef GPU
     integer  :: stat
+    real(8), optional, intent(out)    :: alm(1:nsim, 0:lmax, 0:lmax)
+#else
+    real(8), intent(out)    :: alm(1:nsim, 0:lmax, 0:lmax)
 #endif
 
 #ifdef GPU
@@ -249,7 +255,9 @@ SUBROUTINE t2alm_iter( t, alm, niter )
         enddo
     enddo
 #ifdef GPU
-    alm = d_alm
+    if( present(alm) ) then
+       alm = d_alm
+    endif
 #endif
 
     return 
@@ -265,7 +273,7 @@ end
 ! mask, which was fixed in HEALPix 3.50. This programs is consistent to the
 ! fixed HEALPix routines, so it might give slightly different result to
 ! HERALPIx 3.31 or earlier ones
-SUBROUTINE t2alm_iter_old( t, alm, niter )
+SUBROUTINE t2alm_iter_old( t, niter, alm )
   use sht_data_module
 #ifdef GPU
   use cublas_v2
@@ -275,7 +283,6 @@ SUBROUTINE t2alm_iter_old( t, alm, niter )
 
     ! Main input/output, alm is saved as a real-value square matrix
     real(8), intent(in)     :: t(0:npix-1, 1:nsim)
-    real(8), intent(out)    :: alm(1:nsim, 0:lmax, 0:lmax)
 
     ! scalar variables
     integer(4), intent(in)  :: niter
@@ -283,6 +290,9 @@ SUBROUTINE t2alm_iter_old( t, alm, niter )
 
 #ifdef GPU
     integer  :: stat
+    real(8), optional, intent(out)    :: alm(1:nsim, 0:lmax, 0:lmax)
+#else
+    real(8), intent(out)    :: alm(1:nsim, 0:lmax, 0:lmax)
 #endif
 
 #ifdef GPU
@@ -349,7 +359,9 @@ SUBROUTINE t2alm_iter_old( t, alm, niter )
         enddo
      enddo
 #ifdef GPU
-    alm = d_alm
+     if( present(alm) ) then
+        alm = d_alm
+     endif
 #endif
     return 
 end
@@ -1213,16 +1225,6 @@ SUBROUTINE E2QU( almE, Q, U )
 end
 
 
-
-
-
-
-
-
-
-
-
-
 ! SUBROUTINE B2QU( almB, Q, U )
 !     !DIR$ ATTRIBUTES FORCEINLINE :: set_locations
 !     use sht_data_module, only: nside, npix, lmax, nsim, nring, plm1, plm2, &
@@ -1259,7 +1261,19 @@ end
 ! end
 
 
+#ifdef GPU
 
+SUBROUTINE get_alm( alm )
+  ! copy from d_alm to alm
+  use sht_data_module
+  
+  real(8), intent(out) :: alm(1:nsim, 0:lmax, 0:lmax)
+
+  alm = d_alm
+
+end
+  
+#endif
 
 
 
