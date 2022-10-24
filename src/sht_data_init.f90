@@ -5,7 +5,7 @@ subroutine sht_data_alloc(params)
   use cublas_v2
 #endif
     implicit none
-    integer(4) :: params(1:5), nbuff, stat, m
+    integer(4) :: params(1:5), nbuff, stat, m, i, k
 
     nside    = params(1)
     lmax     = params(2)
@@ -52,46 +52,31 @@ subroutine sht_data_alloc(params)
     if ( allocated(val1     ) ) deallocate(val1    )
     if ( allocated(val2     ) ) deallocate(val2    )
     if ( allocated(pos      ) ) deallocate(pos     )
-#ifdef GPU
-    allocate( ring_tab(            0:lmax) );
-    allocate( val1    (0:2*nside-1,0:lmax) );
-    allocate( val2    (0:2*nside-1,0:lmax) );
-    allocate( pos     (0:2*nside-1,0:lmax) );
-#else
-    allocate( ring_tab(            0:lmax) );
-    allocate( val1    (0:2*nside-1,0:lmax) );
-    allocate( val2    (0:2*nside-1,0:lmax) );
-    allocate( pos     (0:2*nside-1,0:lmax) );
-#endif
+
+    allocate( ring_tab(            0:lmax) ); ring_tab = 0;
+    allocate( val1    (0:2*nside-1,0:lmax) ); val1 = 0;
+    allocate( val2    (0:2*nside-1,0:lmax) ); val2 = 0;
+    allocate( pos     (0:2*nside-1,0:lmax) ); pos = 0;
+    
     ! basic ring information
     if (allocated(theta))  deallocate(theta)
     if (allocated(phi0 ))  deallocate(phi0 )
-#ifdef GPU
-    allocate( theta(0:nside*2-1) );
-    allocate( phi0 (0:nside*2-1) );
-#else
-    allocate( theta(0:nside*2-1) );
-    allocate( phi0 (0:nside*2-1) );
-#endif
+
+    allocate( theta(0:nside*2-1) ); theta = 0;
+    allocate( phi0 (0:nside*2-1) ); phi0 = 0;
+
     ! initialization for the plm-constants
     if (allocated(cc       )) deallocate(cc )
     if (allocated(ss       )) deallocate(ss )
     if (allocated(b_w      )) deallocate(b_w)
     if (allocated(c_w      )) deallocate(c_w)
     if (allocated(two_on_s2)) deallocate(two_on_s2)
-#ifdef GPU
-    allocate( cc       (0:nside*2-1) );
-    allocate( ss       (0:nside*2-1) );
-    allocate( b_w      (0:nside*2-1) );
-    allocate( c_w      (0:nside*2-1) );
-    allocate( two_on_s2(0:nside*2-1) );
-#else
-    allocate( cc       (0:nside*2-1) );
-    allocate( ss       (0:nside*2-1) );
-    allocate( b_w      (0:nside*2-1) );
-    allocate( c_w      (0:nside*2-1) );
-    allocate( two_on_s2(0:nside*2-1) );
-#endif
+
+    allocate( cc       (0:nside*2-1) ); cc = 0;
+    allocate( ss       (0:nside*2-1) ); ss = 0;
+    allocate( b_w      (0:nside*2-1) ); b_w = 0;
+    allocate( c_w      (0:nside*2-1) ); c_w = 0;
+    allocate( two_on_s2(0:nside*2-1) ); two_on_s2 = 0;
     
     if (allocated(c1      )) deallocate(c1)
     if (allocated(c2      )) deallocate(c2)
@@ -103,54 +88,33 @@ subroutine sht_data_alloc(params)
     if (allocated(normal_m)) deallocate(normal_m)
     if (allocated(lam_fact)) deallocate(lam_fact)
     if (allocated(diag_fac )) deallocate(diag_fac)
-#ifdef GPU
-    allocate( c1      (0:lmax) );
-    allocate( c2      (0:lmax) );
-    allocate( c3      (0:lmax) );
-    allocate( c4      (0:lmax) );
-    allocate( a       (0:lmax) );
-    allocate( b       (0:lmax) );
-    allocate( normal_l(0:lmax) );
-    allocate( normal_m(0:lmax) );
-    allocate( lam_fact(0:lmax) );
-    allocate( diag_fac (0:lmax) );
-#else
-    allocate( c1      (0:lmax) );
-    allocate( c2      (0:lmax) );
-    allocate( c3      (0:lmax) );
-    allocate( c4      (0:lmax) );
-    allocate( a       (0:lmax) );
-    allocate( b       (0:lmax) );
-    allocate( normal_l(0:lmax) );
-    allocate( normal_m(0:lmax) );
-    allocate( lam_fact(0:lmax) );
-    allocate( diag_fac (0:lmax) );
-#endif
+
+    allocate( c1      (0:lmax) ); c1 = 0;
+    allocate( c2      (0:lmax) ); c2 = 0;
+    allocate( c3      (0:lmax) ); c3 = 0;
+    allocate( c4      (0:lmax) ); c4 = 0;
+    allocate( a       (0:lmax) ); a = 0;
+    allocate( b       (0:lmax) ); b = 0;
+    allocate( normal_l(0:lmax) ); normal_l = 0; 
+    allocate( normal_m(0:lmax) ); normal_m = 0;
+    allocate( lam_fact(0:lmax) ); lam_fact = 0;
+    allocate( diag_fac (0:lmax) ); diag_fac = 0;
+
     if (allocated(plm0)) deallocate(plm0)
     if (allocated(plm1)) deallocate(plm1)
     if (allocated(plm2)) deallocate(plm2)
-#ifdef GPU
-    allocate( plm0(0:nring-1,-2:lmax) );
-    allocate( plm1(0:nring-1,-2:lmax) );
-    allocate( plm2(0:nring-1,-2:lmax) );
-#else
-    allocate( plm0(0:nring-1,-2:lmax) );
-    allocate( plm1(0:nring-1,-2:lmax) );
-    allocate( plm2(0:nring-1,-2:lmax) );
-#endif
+
+    allocate( plm0(0:nring-1,-2:lmax) ); plm0 = 0;
+    allocate( plm1(0:nring-1,-2:lmax) ); plm1 = 0;
+    allocate( plm2(0:nring-1,-2:lmax) ); plm2 = 0;
     
     if (allocated(i1_arr)) deallocate(i1_arr)
     if (allocated(i2_arr)) deallocate(i2_arr)
     if (allocated(nfft_arr)) deallocate(nfft_arr)
-#ifdef GPU
-    allocate( i1_arr(0:nring-1)  );
-    allocate( i2_arr(0:nring-1)  );
-    allocate( nfft_arr(0:nring-1) );
-#else
-    allocate( i1_arr(0:nring-1)   );
-    allocate( i2_arr(0:nring-1)   );
-    allocate( nfft_arr(0:nring-1) );
-#endif
+
+    allocate( i1_arr(0:nring-1)   ); i1_arr = 0;
+    allocate( i2_arr(0:nring-1)   ); i2_arr = 0;
+    allocate( nfft_arr(0:nring-1) ); nfft_arr = 0;
     
 
     
@@ -161,72 +125,57 @@ subroutine sht_data_alloc(params)
     if (allocated(fac2)) deallocate(fac2)
     if (allocated(fac3)) deallocate(fac3)
     if (allocated(fac4)) deallocate(fac4)
-#ifdef GPU
-    allocate( tab (0:  nring-1,0:lmax) );
-    allocate( fac1(0:2*nside-1,0:lmax) );
-    allocate( fac2(0:2*nside-1,0:lmax) );
-    allocate( fac3(0:2*nside-1,0:lmax) );
-    allocate( fac4(0:2*nside-1,0:lmax) );
-#else
-    allocate( tab (0:  nring-1,0:lmax) );
-    allocate( fac1(0:2*nside-1,0:lmax) );
-    allocate( fac2(0:2*nside-1,0:lmax) );
-    allocate( fac3(0:2*nside-1,0:lmax) );
-    allocate( fac4(0:2*nside-1,0:lmax) );
-#endif
+
+    allocate( tab (0:  nring-1,0:lmax) ); tab = 0;
+    allocate( fac1(0:2*nside-1,0:lmax) ); fac1 = 0;
+    allocate( fac2(0:2*nside-1,0:lmax) ); fac2 = 0;
+    allocate( fac3(0:2*nside-1,0:lmax) ); fac3 = 0;
+    allocate( fac4(0:2*nside-1,0:lmax) ); fac4 = 0;
+
     ! Backward
     if (allocated(tabI )) deallocate(tabI)
     if (allocated(fac1I)) deallocate(fac1I)
     if (allocated(fac2I)) deallocate(fac2I)
     if (allocated(fac3I)) deallocate(fac3I)
     if (allocated(fac4I)) deallocate(fac4I)
-#ifdef GPU
-    allocate( tabI (0:nring-1,0:lmax)  );
-    allocate( fac1I(0:2*nside-1,0:lmax) );
-    allocate( fac2I(0:2*nside-1,0:lmax) );
-    allocate( fac3I(0:2*nside-1,0:lmax) );
-    allocate( fac4I(0:2*nside-1,0:lmax) );
-#else
-    allocate( tabI (0:nring-1,0:lmax)   );
-    allocate( fac1I(0:2*nside-1,0:lmax) );
-    allocate( fac2I(0:2*nside-1,0:lmax) );
-    allocate( fac3I(0:2*nside-1,0:lmax) );
-    allocate( fac4I(0:2*nside-1,0:lmax) );
-#endif
+
+    allocate( tabI (0:nring-1,0:lmax)   ); tabI = 0;
+    allocate( fac1I(0:2*nside-1,0:lmax) ); fac1I = 0;
+    allocate( fac2I(0:2*nside-1,0:lmax) ); fac2I = 0;
+    allocate( fac3I(0:2*nside-1,0:lmax) ); fac3I = 0;
+    allocate( fac4I(0:2*nside-1,0:lmax) ); fac4I = 0;
     
     ! tables for dgemm factors
     if (allocated(swap)) deallocate(swap)
     if (allocated(a1  )) deallocate(a1)
     if (allocated(a2  )) deallocate(a2)
-#ifdef GPU
-    allocate( swap(0:1,0:3) );
-    allocate( a1  (0:1,0:3) );
-    allocate( a2  (0:1,0:3) );
-#else
-    allocate( swap(0:1,0:3) );
-    allocate( a1  (0:1,0:3) );
-    allocate( a2  (0:1,0:3) );
-#endif
+
+    allocate( swap(0:1,0:3) ); swap = 0;
+    allocate( a1  (0:1,0:3) ); a1 = 0;
+    allocate( a2  (0:1,0:3) ); a2 = 0;
 
     
     ! slices of the FFT-matrix
     if (allocated(mat_cache1)) deallocate(mat_cache1)
     if (allocated(mat_cache2)) deallocate(mat_cache2)
-#ifdef GPU
-    allocate( mat_cache1(1:nsim, 0:nring-1) );
-    allocate( mat_cache2(1:nsim, 0:nring-1) );
-#else
-    allocate( mat_cache1(1:nsim, 0:nring-1) );
-    allocate( mat_cache2(1:nsim, 0:nring-1) );
-#endif
+
+    allocate( mat_cache1(1:nsim, 0:nring-1) ); mat_cache1 = 0;
+    allocate( mat_cache2(1:nsim, 0:nring-1) ); mat_cache2 = 0;
 
     !main FFT-buffs for SHT
     if (nbuff.ge.1) then
         if (allocated(buff1)) deallocate(buff1)
-        allocate( buff1(1:nsim, 0:npix-1) ); 
+        allocate( buff1(1:nsim, 0:npix-1) );
 #ifdef GPU
         if (allocated(d_buff1)) deallocate(d_buff1)
         allocate( d_buff1(1:nsim, 0:npix-1) );
+#else
+        !$omp parallel do
+        do i=0, npix-1
+           do k=1,nsim
+              buff1(k, i) = 0
+           enddo
+        enddo
 #endif
     endif
 
@@ -237,6 +186,12 @@ subroutine sht_data_alloc(params)
         allocate( d_buff2(1:nsim, 0:npix-1) );
 #else
         allocate( buff2(1:nsim, 0:npix-1) );
+        !$omp parallel do
+        do i=0, npix-1
+           do k=1,nsim
+              buff2(k, i) = 0
+           enddo
+        enddo
 #endif
     endif
 
@@ -247,6 +202,12 @@ subroutine sht_data_alloc(params)
         allocate( d_buff3(1:nsim, 0:npix-1) );
 #else
         allocate( buff3(1:nsim, 0:npix-1) );
+        !$omp parallel do
+        do i=0, npix-1
+           do k=1,nsim
+              buff3(k, i) = 0
+           enddo
+        enddo
 #endif
     endif
 
@@ -257,6 +218,12 @@ subroutine sht_data_alloc(params)
        allocate( d_buff4(1:nsim, 0:npix-1) );
 #else
        allocate( buff4(1:nsim, 0:npix-1) );
+       !$omp parallel do
+       do i=0, npix-1
+          do k=1,nsim
+             buff4(k, i) = 0
+           enddo
+        enddo
 #endif
     endif
 
@@ -265,29 +232,29 @@ subroutine sht_data_alloc(params)
     if (allocated(h_a1)) deallocate(h_a1)
     if (allocated(h_a2)) deallocate(h_a2)
     if (allocated(h_swap)) deallocate(h_swap)
-    allocate( d_alm(1:nsim, 0:lmax, 0:lmax) );
-    allocate( h_a1  (0:1,0:3) );
-    allocate( h_a2  (0:1,0:3) );
-    allocate( h_swap(0:1,0:3) );
+    allocate( d_alm(1:nsim, 0:lmax, 0:lmax) ); d_alm = 0;
+    allocate( h_a1  (0:1,0:3) ); h_a1 = 0;
+    allocate( h_a2  (0:1,0:3) ); h_a2 = 0;
+    allocate( h_swap(0:1,0:3) ); h_swap = 0;
     if (allocated(h_i1_arr)) deallocate(h_i1_arr)
     if (allocated(h_i2_arr)) deallocate(h_i2_arr)
     if (allocated(h_nfft_arr)) deallocate(h_nfft_arr)
-    allocate( h_i1_arr(0:nring-1)  );
-    allocate( h_i2_arr(0:nring-1)  );
-    allocate( h_nfft_arr(0:nring-1) );
+    allocate( h_i1_arr(0:nring-1)  ); h_i1_arr = 0;
+    allocate( h_i2_arr(0:nring-1)  ); h_i2_arr = 0;
+    allocate( h_nfft_arr(0:nring-1) ); h_nfft_arr = 0;
     
     if(is_pol > 0) then
        if (allocated(d_alm2)) deallocate(d_alm2)
-       allocate( d_alm2(1:nsim, 0:lmax, 0:lmax) );   
+       allocate( d_alm2(1:nsim, 0:lmax, 0:lmax) );    d_alm2 = 0;
     endif
 
 #endif
     ! flags for set/accumulate the map-FFT
     if (allocated(acc_flag1)) deallocate(acc_flag1)
-    allocate( acc_flag1(0:npix-1) );
+    allocate( acc_flag1(0:npix-1) ); acc_flag1 = 0;
 
     if (allocated(acc_flag2)) deallocate(acc_flag2)
-    allocate( acc_flag2(0:npix-1) );
+    allocate( acc_flag2(0:npix-1) ); acc_flag2 = 0;
 
 #ifdef GPU
     if (allocated(cu_streams)) then
