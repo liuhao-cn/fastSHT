@@ -60,8 +60,23 @@ class SHT:
             
         fastSHT.sht_data_alloc(np.array((self.nside, self.lmax, self.nring, self.nsim, self.nbuff, self.pol), dtype=np.int32))
         fastSHT.sht_set_data(ring_tab[:lmax+1],plm_pos, plm_val1, plm_val2, theta, phi0)
+
+    # set the map in the SHT class
+    def set_maps(self, maps_in):
+        self.maps = maps_in
+
+    # set the alms in the SHT class
+    def set_alms(alms_in):
+        self.alms = alms_in
         
-    def t2alm(self, maps, alms_in=None, method='old', get_alm=True):
+    def t2alm(self, maps_in=None, alms_in=None, method='old', get_alm=True):
+        if(maps_in is None):
+            maps = self.maps
+        else:
+            maps = maps_in
+        if(maps is None):
+            raise ValueError('No input maps AND no internal maps! Check the parameters or call set_maps(maps_in)!')
+        
         if(alms_in is None and get_alm == True):
             try:
                 alms = numba.cuda.pinned_array((self.nsim, self.lmax+1, self.lmax+1), dtype=np.double, strides=None, order='F')
@@ -195,7 +210,8 @@ class SHT:
         return alms_hp
 
 
-    def get_alm(self, alms_in=None):
+    # get alms from GPU (only use it when gpu is enabled)
+    def get_alms(self, alms_in=None):
         if(alms_in is None):
             try:
                 alms = numba.cuda.pinned_array((self.nsim, self.lmax+1, self.lmax+1), dtype=np.double, strides=None, order='F')
