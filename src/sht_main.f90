@@ -1225,40 +1225,68 @@ SUBROUTINE E2QU( almE, Q, U )
 end
 
 
-! SUBROUTINE B2QU( almB, Q, U )
-!     !DIR$ ATTRIBUTES FORCEINLINE :: set_locations
-!     use sht_data_module, only: nside, npix, lmax, nsim, nring, plm1, plm2, &
-!         buff1, buff2, i1_arr, i2_arr, nfft_arr
-!     implicit none
-!     ! Main input/output, alm is saved as real-value square matrix with the new scheme (see fig.1)
-!     real(8), intent(in)    :: almB(1:nsim, 0:lmax, 0:lmax)
-!     real(8), intent(out)   :: Q(0:npix-1, 1:nsim)
-!     real(8), intent(out)   :: U(0:npix-1, 1:nsim)
+SUBROUTINE B2QU( almB, Q, U )
+    use sht_data_module
+#ifdef GPU
+    use cudafor
+#endif
+    implicit none
 
-!     integer(4) :: m, i
+    ! Main input/output, alm is saved as real-value square matrix with the new scheme (see fig.1)
+#ifdef GPU
+    real(8), intent(in), device   :: almB(1:nsim, 0:lmax, 0:lmax)
+    real(8), intent(out)   :: Q(0:npix-1, 1:nsim)
+    real(8), intent(out)   :: U(0:npix-1, 1:nsim)
+    integer  :: stat
+#else
+    real(8), intent(in)    :: almB(1:nsim, 0:lmax, 0:lmax)
+    real(8), intent(out)   :: Q(0:npix-1, 1:nsim)
+    real(8), intent(out)   :: U(0:npix-1, 1:nsim)
+#endif
 
-!     do m=0, lmax
-!         call set_locations(m)
+
+    integer(4) :: m, i
+
+    do m=0, lmax
+        call set_locations(m)
         
-!         call get_plm_recursive(1, m)
+        call get_plm_recursive(1, m)
+#ifdef GPU
+        call alm2mat( cu_streams(m), almB, plm1, m, 1, 0.d0)
+        call mat2fft_fast(d_buff2, m)
 
-!         call alm2mat( almB, plm1, m, 1, 0.d0)
-!         call mat2fft_fast(buff2, m)
+        call alm2mat( cu_streams(m), almB, plm2, m, 3, 0.d0)
+        call mat2fft_fast(d_buff1, m)        
+#else
+        call alm2mat( almB, plm1, m, 1, 0.d0)
+        call mat2fft_fast(buff2, m)
 
-!         call alm2mat( almB, plm2, m, 3, 0.d0)
-!         call mat2fft_fast(buff1, m)
-!     enddo
+        call alm2mat( almB, plm2, m, 3, 0.d0)
+        call mat2fft_fast(buff1, m)
+#endif
+    enddo
 
-!     do i=0,nring-1
-!         if(2*(lmax+1) .lt. nfft_arr(i)) buff1(:,2*(lmax+1)+i1_arr(i):i2_arr(i)) = 0
-!         if(2*(lmax+1) .lt. nfft_arr(i)) buff2(:,2*(lmax+1)+i1_arr(i):i2_arr(i)) = 0
-!     enddo
+    !$acc kernels loop
+    do i=0,nring-1
+#ifdef GPU
+       if(2*(lmax+1) .lt. h_nfft_arr(i)) d_buff1(:,2*(lmax+1)+h_i1_arr(i):h_i2_arr(i)) = 0
+       if(2*(lmax+1) .lt. h_nfft_arr(i)) d_buff2(:,2*(lmax+1)+h_i1_arr(i):h_i2_arr(i)) = 0       
+#else
+       if(2*(lmax+1) .lt. nfft_arr(i)) buff1(:,2*(lmax+1)+i1_arr(i):i2_arr(i)) = 0
+       if(2*(lmax+1) .lt. nfft_arr(i)) buff2(:,2*(lmax+1)+i1_arr(i):i2_arr(i)) = 0
+#endif
+    enddo
+    !$end kernels
 
-!     call fft2map( buff1, Q )
-!     call fft2map( buff2, U )
-
-!     return 
-! end
+#ifdef GPU
+    call fft2map( d_buff1, buff1, Q )
+    call fft2map( d_buff2, buff1, U )    
+#else
+    call fft2map( buff1, Q )
+    call fft2map( buff2, U )
+#endif
+    return 
+end
 
 
 #ifdef GPU
